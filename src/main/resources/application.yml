@@ -1,14 +1,18 @@
-# ===== AITAES ???? =====
+# ===== AITAES 数智化教学分析评价系统 =====
 spring:
   application:
     name: AITAES
   datasource:
-    url: jdbc:mysql://localhost:3306/aitaes_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/aitaes_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-# ===== MyBatis-Plus?? =====
+# ===== MyBatis-Plus 配置 =====
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   type-aliases-package: com.example.aitaes.entity
@@ -22,7 +26,13 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
-# ===== ???? =====
+# ===== 日志 =====
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [AITAES] %-5level %logger{36} - %msg%n"
+
+# ===== AITAES 业务配置 =====
+aitaes:
+  import:
+    batch-size: 500
+    max-errors: 100
