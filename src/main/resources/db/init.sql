@@ -4,8 +4,10 @@
 -- 字符集：utf8mb4
 -- ============================================================
 
--- 使用数据库
 USE aitaes_db;
+
+-- 关闭外键检查，允许按任意顺序 DROP TABLE
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- ============================================================
 -- 1. 教师表
@@ -76,7 +78,9 @@ CREATE TABLE `t_course` (
     UNIQUE KEY `uk_course_no` (`course_no`),
     KEY `idx_teacher_id` (`teacher_id`),
     KEY `idx_semester` (`semester`),
-    KEY `idx_course_type` (`course_type`)
+    KEY `idx_course_type` (`course_type`),
+    CONSTRAINT `fk_course_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `t_teacher` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程表';
 
 
@@ -90,15 +94,20 @@ CREATE TABLE `t_course_student` (
     `student_id`    BIGINT       NOT NULL COMMENT '学生ID',
     `semester`      VARCHAR(32)  DEFAULT NULL COMMENT '选课学期',
     `create_time`   DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `deleted`       TINYINT      DEFAULT 0 COMMENT '逻辑删除（0=正常，1=退课）',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_course_student` (`course_id`, `student_id`),
     KEY `idx_course_id` (`course_id`),
-    KEY `idx_student_id` (`student_id`)
+    KEY `idx_student_id` (`student_id`),
+    CONSTRAINT `fk_cs_course`  FOREIGN KEY (`course_id`)  REFERENCES `t_course` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_cs_student` FOREIGN KEY (`student_id`) REFERENCES `t_student` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程-学生选课关联表';
 
 
 -- ============================================================
--- 5. 评价指标表（支持两级指标体系）
+-- 5. 评价指标表（支持两级指标体系，parent_id 自引用）
 -- ============================================================
 DROP TABLE IF EXISTS `t_evaluation_indicator`;
 CREATE TABLE `t_evaluation_indicator` (
@@ -112,17 +121,20 @@ CREATE TABLE `t_evaluation_indicator` (
     `description`     VARCHAR(512)   DEFAULT NULL COMMENT '指标说明/评分标准',
     `sort_order`      INT            DEFAULT 0 COMMENT '排序号',
     `create_time`     DATETIME       DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `deleted`         TINYINT        DEFAULT 0 COMMENT '逻辑删除（0=未删除，1=已删除）',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_indicator_no` (`indicator_no`),
     KEY `idx_category` (`category`),
     KEY `idx_parent_id` (`parent_id`),
     KEY `idx_level` (`level`),
-    KEY `idx_sort_order` (`sort_order`)
+    KEY `idx_sort_order` (`sort_order`),
+    CONSTRAINT `fk_indicator_parent` FOREIGN KEY (`parent_id`) REFERENCES `t_evaluation_indicator` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评价指标表';
 
 
 -- ============================================================
--- 6. 评价分数表
+-- 6. 评价分数表（核心事实表）
 -- ============================================================
 DROP TABLE IF EXISTS `t_evaluation_score`;
 CREATE TABLE `t_evaluation_score` (
@@ -134,12 +146,20 @@ CREATE TABLE `t_evaluation_score` (
     `comment`         VARCHAR(1024)  DEFAULT NULL COMMENT '评价意见/文本评价',
     `semester`        VARCHAR(32)    DEFAULT NULL COMMENT '学期',
     `evaluate_time`   DATETIME       DEFAULT CURRENT_TIMESTAMP COMMENT '评价时间',
+    `deleted`         TINYINT        DEFAULT 0 COMMENT '逻辑删除（0=未删除，1=已删除）',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_score` (`course_id`, `student_id`, `indicator_id`),
     KEY `idx_course_id` (`course_id`),
     KEY `idx_student_id` (`student_id`),
     KEY `idx_indicator_id` (`indicator_id`),
-    KEY `idx_semester` (`semester`)
+    KEY `idx_semester` (`semester`),
+    KEY `idx_course_semester` (`course_id`, `semester`),
+    CONSTRAINT `fk_score_course`    FOREIGN KEY (`course_id`)    REFERENCES `t_course` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_score_student`   FOREIGN KEY (`student_id`)   REFERENCES `t_student` (`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_score_indicator` FOREIGN KEY (`indicator_id`) REFERENCES `t_evaluation_indicator` (`id`)
+        ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评价分数表';
 
 
@@ -156,6 +176,7 @@ CREATE TABLE `t_data_source` (
     `status`        VARCHAR(16)    DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE/INACTIVE',
     `create_time`   DATETIME       DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   DATETIME       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`       TINYINT        DEFAULT 0 COMMENT '逻辑删除（0=未删除，1=已删除）',
     PRIMARY KEY (`id`),
     KEY `idx_source_type` (`source_type`),
     KEY `idx_status` (`status`)
@@ -177,11 +198,14 @@ CREATE TABLE `t_data_import_log` (
     `status`        VARCHAR(16)    DEFAULT NULL COMMENT '状态：SUCCESS/PARTIAL/FAILED',
     `error_msg`     TEXT           DEFAULT NULL COMMENT '错误信息',
     `import_time`   DATETIME       DEFAULT CURRENT_TIMESTAMP COMMENT '导入时间',
+    `deleted`       TINYINT        DEFAULT 0 COMMENT '逻辑删除（0=未删除，1=已删除）',
     PRIMARY KEY (`id`),
     KEY `idx_source_id` (`source_id`),
     KEY `idx_import_type` (`import_type`),
     KEY `idx_status` (`status`),
-    KEY `idx_import_time` (`import_time`)
+    KEY `idx_import_time` (`import_time`),
+    CONSTRAINT `fk_log_source` FOREIGN KEY (`source_id`) REFERENCES `t_data_source` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据导入日志表';
 
 
@@ -200,11 +224,16 @@ CREATE TABLE `t_report` (
     `report_data`     JSON           DEFAULT NULL COMMENT '报告详细数据（JSON格式）',
     `ai_analysis`     TEXT           DEFAULT NULL COMMENT 'AI分析结果文本',
     `generate_time`   DATETIME       DEFAULT CURRENT_TIMESTAMP COMMENT '生成时间',
+    `deleted`         TINYINT        DEFAULT 0 COMMENT '逻辑删除（0=未删除，1=已删除）',
     PRIMARY KEY (`id`),
     KEY `idx_report_type` (`report_type`),
     KEY `idx_course_id` (`course_id`),
     KEY `idx_teacher_id` (`teacher_id`),
-    KEY `idx_semester` (`semester`)
+    KEY `idx_semester` (`semester`),
+    CONSTRAINT `fk_report_course`  FOREIGN KEY (`course_id`)  REFERENCES `t_course` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `fk_report_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `t_teacher` (`id`)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评价报告表';
 
 
@@ -220,6 +249,7 @@ CREATE TABLE `t_ai_analysis_result` (
     `result_data`     JSON         DEFAULT NULL COMMENT 'AI分析结果（JSON格式）',
     `model_name`      VARCHAR(64)  DEFAULT NULL COMMENT 'AI模型名称',
     `analysis_time`   DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '分析时间',
+    `deleted`         TINYINT      DEFAULT 0 COMMENT '逻辑删除（0=未删除，1=已删除）',
     PRIMARY KEY (`id`),
     KEY `idx_target` (`target_type`, `target_id`),
     KEY `idx_analysis_type` (`analysis_type`),
@@ -266,3 +296,6 @@ INSERT INTO `t_evaluation_indicator` (`indicator_no`, `indicator_name`, `categor
 ('I04-02', '分析解决问题能力提升',   '教学效果', 0.0625, 4, 2, '课程对学生分析问题和解决问题能力的培养效果', 2),
 ('I04-03', '学习兴趣与主动性激发',   '教学效果', 0.0625, 4, 2, '课程是否激发了学生进一步学习和探究的兴趣', 3),
 ('I04-04', '整体满意度',           '教学效果', 0.0625, 4, 2, '学生对课程教学的整体满意程度', 4);
+
+-- 恢复外键检查
+SET FOREIGN_KEY_CHECKS = 1;

@@ -34,4 +34,7 @@ public class AiAnalysisResult {
 
     /** 分析时间 */
     private LocalDateTime analysisTime;
+
+    /** 逻辑删除（0=正常, 1=删除） */
+    private Integer deleted;
 }

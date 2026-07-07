@@ -35,4 +35,7 @@ public class EvaluationScore {
 
     /** 评价时间 */
     private LocalDateTime evaluateTime;
+
+    /** 逻辑删除（0=正常, 1=删除） */
+    private Integer deleted;
 }

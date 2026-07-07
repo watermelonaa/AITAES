@@ -27,4 +27,7 @@ public class CourseStudent {
     private String semester;
 
     private LocalDateTime createTime;
+
+    /** 逻辑删除（0=正常, 1=退课） */
+    private Integer deleted;
 }

@@ -43,4 +43,7 @@ public class Report {
 
     /** 生成时间 */
     private LocalDateTime generateTime;
+
+    /** 逻辑删除（0=正常, 1=删除） */
+    private Integer deleted;
 }

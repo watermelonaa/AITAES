@@ -35,4 +35,7 @@ public class DataSource {
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
+
+    /** 逻辑删除（0=正常, 1=删除） */
+    private Integer deleted;
 }

@@ -40,4 +40,7 @@ public class EvaluationIndicator {
     private Integer sortOrder;
 
     private LocalDateTime createTime;
+
+    /** 逻辑删除（0=正常, 1=删除） */
+    private Integer deleted;
 }

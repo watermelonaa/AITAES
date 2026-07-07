@@ -43,4 +43,7 @@ public class DataImportLog {
 
     /** 导入时间 */
     private LocalDateTime importTime;
+
+    /** 逻辑删除（0=正常, 1=删除） */
+    private Integer deleted;
 }
