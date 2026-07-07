@@ -1,0 +1,42 @@
+package com.example.aitaes.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@TableName("t_course")
+public class Course {
+
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    /** 课程编号 */
+    private String courseNo;
+
+    /** 课程名称 */
+    private String courseName;
+
+    /** 授课教师ID */
+    private Long teacherId;
+
+    /** 学分 */
+    private BigDecimal credit;
+
+    /** 课程类型：必修/选修/公选 */
+    private String courseType;
+
+    /** 学期 */
+    private String semester;
+
+    /** 课程描述 */
+    private String description;
+
+    private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
+}
