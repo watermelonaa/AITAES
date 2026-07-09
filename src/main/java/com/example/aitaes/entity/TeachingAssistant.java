@@ -7,9 +7,14 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 助教实体
+ * <p>
+ * 关联教师，权限由教师在班级管理中分配。
+ */
 @Data
-@TableName("t_teacher")
-public class Teacher {
+@TableName("t_teaching_assistant")
+public class TeachingAssistant {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -17,33 +22,13 @@ public class Teacher {
     /** 关联 t_user.id */
     private Long userId;
 
-    /** 工号 */
-    private String teacherNo;
+    /** 所属教师ID */
+    private Long teacherId;
 
     /** 姓名 */
     private String name;
 
-    /** 性别 */
-    private String gender;
-
-    /** 学院 */
-    private String college;
-
-    /** 系/部门 */
-    private String department;
-
-    /** 职称 */
-    private String title;
-
-    /** 邮箱 */
-    private String email;
-
-    /** 联系电话 */
-    private String phone;
-
     private LocalDateTime createTime;
-
-    private LocalDateTime updateTime;
 
     /** 逻辑删除（0=正常, 1=删除） */
     private Integer deleted;

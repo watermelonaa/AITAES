@@ -5,14 +5,15 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 课程-学生选课关联表
+ * 考勤记录实体
  */
 @Data
-@TableName("t_course_student")
-public class CourseStudent {
+@TableName("t_attendance")
+public class Attendance {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -23,17 +24,26 @@ public class CourseStudent {
     /** 学生ID */
     private Long studentId;
 
-    /** 班级名称（如"计科1801"） */
-    private String className;
+    /** 日期 */
+    private LocalDate attendanceDate;
 
-    /** 选课学期 */
+    /** 状态：PRESENT/LATE/LEAVE/ABSENT */
+    private String status;
+
+    /** 第几周 */
+    private Integer weekNo;
+
+    /** 节次（如"第1-2节"） */
+    private String period;
+
+    /** 学期 */
     private String semester;
 
-    /** 教师重点关注标记 */
-    private Integer isFocus;
+    /** 备注 */
+    private String remark;
 
     private LocalDateTime createTime;
 
-    /** 逻辑删除（0=正常, 1=退课） */
+    /** 逻辑删除（0=正常, 1=删除） */
     private Integer deleted;
 }

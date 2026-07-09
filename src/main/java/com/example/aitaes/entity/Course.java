@@ -36,6 +36,9 @@ public class Course {
     /** 课程描述 */
     private String description;
 
+    /** 课程知识点列表（JSON格式，缓存完整知识点结构） */
+    private String knowledgePointList;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;

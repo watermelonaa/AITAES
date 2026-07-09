@@ -14,6 +14,9 @@ public class Student {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 关联 t_user.id */
+    private Long userId;
+
     /** 学号 */
     private String studentNo;
 
@@ -34,6 +37,9 @@ public class Student {
 
     /** 年级 */
     private String grade;
+
+    /** 头像URL（默认占位） */
+    private String avatar;
 
     /** 邮箱 */
     private String email;

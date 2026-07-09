@@ -13,8 +13,19 @@ public enum ImportType {
     TEACHER("TEACHER", "教师信息"),
     STUDENT("STUDENT", "学生信息"),
     COURSE("COURSE", "课程信息"),
-    SCORE("SCORE", "评价分数"),
-    INDICATOR("INDICATOR", "评价指标");
+    /** @deprecated 评教系统遗留，v3.0不再使用 */
+    @Deprecated
+    SCORE("SCORE", "评价分数(遗留)"),
+    /** @deprecated 评教系统遗留，v3.0不再使用 */
+    @Deprecated
+    INDICATOR("INDICATOR", "评价指标(遗留)"),
+    // ==== v3.0 新增导入类型 ====
+    HOMEWORK("HOMEWORK", "作业成绩"),
+    ATTENDANCE("ATTENDANCE", "考勤记录"),
+    EXPERIMENT("EXPERIMENT", "实验报告"),
+    EXAM_SCORE("EXAM_SCORE", "考试成绩"),
+    KNOWLEDGE_POINT("KNOWLEDGE_POINT", "知识点"),
+    CLASS_STUDENT("CLASS_STUDENT", "班级学生名单");
 
     private final String code;
     private final String description;
