@@ -21,6 +21,7 @@ public enum ImportType {
     INDICATOR("INDICATOR", "评价指标(遗留)"),
     // ==== v3.0 新增导入类型 ====
     HOMEWORK("HOMEWORK", "作业成绩"),
+    QUIZ("QUIZ", "测验成绩"),
     ATTENDANCE("ATTENDANCE", "考勤记录"),
     EXPERIMENT("EXPERIMENT", "实验报告"),
     EXAM_SCORE("EXAM_SCORE", "考试成绩"),

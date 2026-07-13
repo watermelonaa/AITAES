@@ -1,6 +1,7 @@
 package com.example.aitaes.mapper;
 
 import com.example.aitaes.entity.Teacher;
+import com.example.aitaes.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ class TeacherMapperTest {
 
     @Autowired
     private TeacherMapper teacherMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Test
     @DisplayName("查询全部教师 → 返回测试数据中的 2 条")
@@ -64,7 +68,15 @@ class TeacherMapperTest {
     @Test
     @DisplayName("插入新教师 → 可查询到")
     void shouldInsertAndQuery() {
+        // 先创建 t_user 账号
+        User user = new User();
+        user.setUsername("T003");
+        user.setPassword("$2a$10$dummy");
+        user.setRole("TEACHER");
+        userMapper.insert(user);
+
         Teacher newTeacher = new Teacher();
+        newTeacher.setUserId(user.getId());
         newTeacher.setTeacherNo("T003");
         newTeacher.setName("测试教师");
         newTeacher.setCollege("测试学院");

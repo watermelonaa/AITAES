@@ -26,12 +26,44 @@ DROP TABLE IF EXISTS t_data_source;
 DROP TABLE IF EXISTS t_ai_analysis_result;
 DROP TABLE IF EXISTS t_student;
 DROP TABLE IF EXISTS t_teacher;
+DROP TABLE IF EXISTS t_user;
+DROP TABLE IF EXISTS t_system_config;
+
+-- ============================================================
+-- 0. 统一用户认证表
+-- ============================================================
+CREATE TABLE t_user (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username        VARCHAR(32)  NOT NULL UNIQUE,
+    password        VARCHAR(256) NOT NULL,
+    role            VARCHAR(16)  NOT NULL,
+    status          VARCHAR(16)  DEFAULT 'ACTIVE',
+    first_login     TINYINT      DEFAULT 1,
+    last_login_time TIMESTAMP    DEFAULT NULL,
+    create_time     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    update_time     TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    deleted         TINYINT      DEFAULT 0
+);
+
+-- ============================================================
+-- 0b. 系统参数配置表
+-- ============================================================
+CREATE TABLE t_system_config (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    config_key    VARCHAR(64)  NOT NULL UNIQUE,
+    config_value  VARCHAR(512) NOT NULL,
+    config_type   VARCHAR(32)  DEFAULT 'STRING',
+    description   VARCHAR(256) DEFAULT NULL,
+    create_time   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+);
 
 -- ============================================================
 -- 1. 教师表
 -- ============================================================
 CREATE TABLE t_teacher (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id       BIGINT       NOT NULL UNIQUE,
     teacher_no    VARCHAR(32)  NOT NULL UNIQUE,
     name          VARCHAR(64)  NOT NULL,
     gender        VARCHAR(8)   DEFAULT NULL,
@@ -42,7 +74,8 @@ CREATE TABLE t_teacher (
     phone         VARCHAR(32)  DEFAULT NULL,
     create_time   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     update_time   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    deleted       TINYINT      DEFAULT 0
+    deleted       TINYINT      DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES t_user(id)
 );
 
 -- ============================================================
@@ -50,6 +83,7 @@ CREATE TABLE t_teacher (
 -- ============================================================
 CREATE TABLE t_student (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id       BIGINT       NOT NULL UNIQUE,
     student_no    VARCHAR(32)  NOT NULL UNIQUE,
     name          VARCHAR(64)  NOT NULL,
     gender        VARCHAR(8)   DEFAULT NULL,
@@ -60,7 +94,8 @@ CREATE TABLE t_student (
     email         VARCHAR(128) DEFAULT NULL,
     create_time   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     update_time   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    deleted       TINYINT      DEFAULT 0
+    deleted       TINYINT      DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES t_user(id)
 );
 
 -- ============================================================

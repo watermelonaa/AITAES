@@ -4,11 +4,13 @@ import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.aitaes.dto.ImportResultDTO;
 import com.example.aitaes.dto.excel.ExperimentExcelDTO;
+import com.example.aitaes.entity.Course;
 import com.example.aitaes.entity.Experiment;
 import com.example.aitaes.entity.Student;
 import com.example.aitaes.enums.ImportStatus;
 import com.example.aitaes.enums.ImportType;
 import com.example.aitaes.listener.GenericExcelListener;
+import com.example.aitaes.mapper.CourseMapper;
 import com.example.aitaes.mapper.ExperimentMapper;
 import com.example.aitaes.mapper.StudentMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,9 @@ import java.util.List;
 
 /**
  * 实验报告导入策略
+ * <p>
+ * 文件名格式：{课程编号}_EXPERIMENT_{描述}.xlsx
+ * 如：CS-NET-001_EXPERIMENT_计科1801.xlsx
  */
 @Slf4j
 @Component
@@ -31,6 +36,7 @@ public class ExperimentImportStrategy implements ImportStrategy {
 
     private final ExperimentMapper experimentMapper;
     private final StudentMapper studentMapper;
+    private final CourseMapper courseMapper;
 
     private Long courseId;
     private String semester;
@@ -42,11 +48,33 @@ public class ExperimentImportStrategy implements ImportStrategy {
 
     @Override
     public ImportResultDTO execute(InputStream inputStream, String originalFilename) {
+        parseFileName(originalFilename);
+
         GenericExcelListener<ExperimentExcelDTO> listener =
                 new GenericExcelListener<>(500, this::saveBatch);
         EasyExcel.read(inputStream, ExperimentExcelDTO.class, listener)
                 .sheet().doRead();
         return buildResult(listener);
+    }
+
+    /**
+     * 从文件名解析课程信息：{课程编号}_EXPERIMENT_{描述}.xlsx
+     */
+    private void parseFileName(String filename) {
+        if (filename == null) return;
+        String name = filename.replace(".xlsx", "").replace(".xls", "");
+        String[] parts = name.split("_");
+        if (parts.length >= 2) {
+            Course course = courseMapper.selectOne(
+                    new LambdaQueryWrapper<Course>().eq(Course::getCourseNo, parts[0]));
+            if (course != null) {
+                this.courseId = course.getId();
+                this.semester = course.getSemester();
+                log.info("解析文件名: courseNo={}, courseId={}, semester={}", parts[0], courseId, semester);
+            } else {
+                log.warn("未找到课程: courseNo={}", parts[0]);
+            }
+        }
     }
 
     private void saveBatch(List<ExperimentExcelDTO> dtoList) {

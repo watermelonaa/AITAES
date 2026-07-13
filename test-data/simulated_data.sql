@@ -21,82 +21,159 @@ INSERT IGNORE INTO t_course (course_no, course_name, teacher_id, credit, course_
 -- 获取课程ID
 SET @course_id = (SELECT id FROM t_course WHERE course_no = 'CS301');
 
+-- 先创建学生用户账号（FOREIGN_KEY_CHECKS=0，用student_no作为username）
+INSERT IGNORE INTO t_user (username, password, role) VALUES
+('201726010101', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201803030311', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010102', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010103', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010104', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010105', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010106', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010109', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010112', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010113', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010114', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010115', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010117', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010118', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010119', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010120', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010122', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010123', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010124', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010126', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010127', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010128', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010129', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010130', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201829010201', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT');
+
 -- 补充学生（计科1801班25人，来自模板）
-INSERT IGNORE INTO t_student (student_no, name, gender, college, major, class_name, grade) VALUES
-('201726010101', '李志强', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201803030311', '潘伯迈', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010102', '刘颖', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010103', '吴志豪', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010104', '陈嘉伟', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010105', '张婧怡', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010106', '蔡炯炜', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010109', '李浩', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010112', '王晓玲', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010113', '肖云龙', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010114', '冯婉婷', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010115', '詹佳蕊', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010117', '李娜', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010118', '廖志强', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010119', '刘雨辰', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010120', '何梅梅', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010122', '龙高峰', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010123', '王小明', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010124', '何燕玲', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010126', '刘德权', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010127', '邹鑫海', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010128', '徐静怡', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010129', '钱程', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201826010130', '艾孜买提·艾力木', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
-('201829010201', '焦彦博', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018');
+INSERT IGNORE INTO t_student (user_id, student_no, name, gender, college, major, class_name, grade) VALUES
+((SELECT id FROM t_user WHERE username = '201726010101'), '201726010101', '李志强', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201803030311'), '201803030311', '潘伯迈', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010102'), '201826010102', '刘颖', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010103'), '201826010103', '吴志豪', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010104'), '201826010104', '陈嘉伟', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010105'), '201826010105', '张婧怡', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010106'), '201826010106', '蔡炯炜', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010109'), '201826010109', '李浩', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010112'), '201826010112', '王晓玲', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010113'), '201826010113', '肖云龙', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010114'), '201826010114', '冯婉婷', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010115'), '201826010115', '詹佳蕊', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010117'), '201826010117', '李娜', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010118'), '201826010118', '廖志强', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010119'), '201826010119', '刘雨辰', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010120'), '201826010120', '何梅梅', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010122'), '201826010122', '龙高峰', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010123'), '201826010123', '王小明', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010124'), '201826010124', '何燕玲', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010126'), '201826010126', '刘德权', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010127'), '201826010127', '邹鑫海', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010128'), '201826010128', '徐静怡', '女', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010129'), '201826010129', '钱程', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010130'), '201826010130', '艾孜买提·艾力木', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018'),
+((SELECT id FROM t_user WHERE username = '201829010201'), '201829010201', '焦彦博', '男', '计算机学院', '计算机科学与技术', '计科1801', '2018');
+
+-- 计科1802班学生用户
+INSERT IGNORE INTO t_user (username, password, role) VALUES
+('201713010118', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201804050215', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201804061214', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010201', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010203', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010204', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010206', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010209', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010214', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010215', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010216', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010217', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010218', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010219', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010220', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010222', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010223', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010227', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010228', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010229', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010230', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT');
 
 -- 计科1802班（21人）
-INSERT IGNORE INTO t_student (student_no, name, gender, college, major, class_name, grade) VALUES
-('201713010118', '单晓婷', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201804050215', '潘钰婷', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201804061214', '孙心怡', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010201', '任智超', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010203', '郑耀华', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010204', '谢峰', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010206', '朱鹏辉', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010209', '陈少杰', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010214', '谢政权', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010215', '叶锦涛', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010216', '肖广', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010217', '霍垚鑫', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010218', '杨一凡', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010219', '白佳恒', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010220', '龙诗民', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010222', '陈茜', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010223', '龙诗远', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010227', '叶超强', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010228', '庄园', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010229', '鄢雨', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
-('201826010230', '玛丽亚姆·艾山江', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018');
+INSERT IGNORE INTO t_student (user_id, student_no, name, gender, college, major, class_name, grade) VALUES
+((SELECT id FROM t_user WHERE username = '201713010118'), '201713010118', '单晓婷', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201804050215'), '201804050215', '潘钰婷', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201804061214'), '201804061214', '孙心怡', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010201'), '201826010201', '任智超', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010203'), '201826010203', '郑耀华', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010204'), '201826010204', '谢峰', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010206'), '201826010206', '朱鹏辉', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010209'), '201826010209', '陈少杰', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010214'), '201826010214', '谢政权', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010215'), '201826010215', '叶锦涛', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010216'), '201826010216', '肖广', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010217'), '201826010217', '霍垚鑫', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010218'), '201826010218', '杨一凡', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010219'), '201826010219', '白佳恒', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010220'), '201826010220', '龙诗民', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010222'), '201826010222', '陈茜', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010223'), '201826010223', '龙诗远', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010227'), '201826010227', '叶超强', '男', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010228'), '201826010228', '庄园', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010229'), '201826010229', '鄢雨', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010230'), '201826010230', '玛丽亚姆·艾山江', '女', '计算机学院', '计算机科学与技术', '计科1802', '2018');
+
+-- 计科1803班学生用户
+INSERT IGNORE INTO t_user (username, password, role) VALUES
+('201808030406', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201808030408', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010302', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010303', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010304', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010305', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010306', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010307', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010308', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010310', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010311', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010313', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010316', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010318', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010319', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010321', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010322', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010323', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010325', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010326', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010327', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT'),
+('201826010329', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'STUDENT');
 
 -- 计科1803班（22人）
-INSERT IGNORE INTO t_student (student_no, name, gender, college, major, class_name, grade) VALUES
-('201808030406', '陶双宇', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201808030408', '吴兆基', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010302', '张加帅', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010303', '徐元杰', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010304', '栾博雄', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010305', '黄雅婷', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010306', '黄嘉熙', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010307', '吴星辰', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010308', '赵伟杰', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010310', '朱梦琪', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010311', '胡晨曦', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010313', '刘涛', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010316', '张思远', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010318', '马俊', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010319', '赵品伊', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010321', '黄子涵', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010322', '周洋', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010323', '谭志豪', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010325', '陈奕达', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010326', '牛佳琦', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010327', '栾佳琪', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
-('201826010329', '李瑞琪', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018');
+INSERT IGNORE INTO t_student (user_id, student_no, name, gender, college, major, class_name, grade) VALUES
+((SELECT id FROM t_user WHERE username = '201808030406'), '201808030406', '陶双宇', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201808030408'), '201808030408', '吴兆基', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010302'), '201826010302', '张加帅', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010303'), '201826010303', '徐元杰', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010304'), '201826010304', '栾博雄', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010305'), '201826010305', '黄雅婷', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010306'), '201826010306', '黄嘉熙', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010307'), '201826010307', '吴星辰', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010308'), '201826010308', '赵伟杰', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010310'), '201826010310', '朱梦琪', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010311'), '201826010311', '胡晨曦', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010313'), '201826010313', '刘涛', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010316'), '201826010316', '张思远', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010318'), '201826010318', '马俊', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010319'), '201826010319', '赵品伊', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010321'), '201826010321', '黄子涵', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010322'), '201826010322', '周洋', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010323'), '201826010323', '谭志豪', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010325'), '201826010325', '陈奕达', '男', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010326'), '201826010326', '牛佳琦', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010327'), '201826010327', '栾佳琪', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018'),
+((SELECT id FROM t_user WHERE username = '201826010329'), '201826010329', '李瑞琪', '女', '计算机学院', '计算机科学与技术', '计科1803', '2018');
 
 -- 建立选课关系
 INSERT IGNORE INTO t_course_student (course_id, student_id, class_name, semester)
@@ -209,7 +286,7 @@ WHERE s.class_name = '计科1801'
 SET @record_id = (SELECT r.id FROM t_assessment_record r
   JOIN t_student s ON r.student_id = s.id
   WHERE s.student_no = '201726010101' AND r.assessment_id = 2001);
-INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
+INSERT IGNORE INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
 (@record_id, 1, 15, 20, 'IP数据报分片', '分片偏移量计算错误'),
 (@record_id, 2, 12, 20, 'GBN协议', '协议机制理解不清'),
 (@record_id, 3, 18, 20, 'TCP报文段', '概念混淆'),
@@ -220,7 +297,7 @@ INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_s
 SET @record_id = (SELECT r.id FROM t_assessment_record r
   JOIN t_student s ON r.student_id = s.id
   WHERE s.student_no = '201803030311' AND r.assessment_id = 2001);
-INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
+INSERT IGNORE INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
 (@record_id, 1, 10, 20, '网络时延,TCP/UDP协议', '时延计算错误,传输层协议选择错误'),
 (@record_id, 2, 20, 20, '', ''),
 (@record_id, 3, 15, 20, 'TCP报文段', '报文段结构理解错误'),
@@ -231,7 +308,7 @@ INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_s
 SET @record_id = (SELECT r.id FROM t_assessment_record r
   JOIN t_student s ON r.student_id = s.id
   WHERE s.student_no = '201826010102' AND r.assessment_id = 2001);
-INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
+INSERT IGNORE INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
 (@record_id, 1, 17, 20, '距离向量路由算法', '算法步骤理解错误'),
 (@record_id, 2, 20, 20, '', ''),
 (@record_id, 3, 20, 20, '', ''),
@@ -242,7 +319,7 @@ INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_s
 SET @record_id = (SELECT r.id FROM t_assessment_record r
   JOIN t_student s ON r.student_id = s.id
   WHERE s.student_no = '201826010123' AND r.assessment_id = 2001);
-INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
+INSERT IGNORE INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
 (@record_id, 1, 8, 20, 'TCP/IP参考模型,OSI模型', '模型分层概念严重混淆'),
 (@record_id, 2, 10, 20, 'CSMA/CD协议实现', '协议流程理解错误'),
 (@record_id, 3, 12, 20, 'IP数据报分片', '计算错误'),
@@ -253,7 +330,7 @@ INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_s
 SET @record_id = (SELECT r.id FROM t_assessment_record r
   JOIN t_student s ON r.student_id = s.id
   WHERE s.student_no = '201826010130' AND r.assessment_id = 2001);
-INSERT INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
+INSERT IGNORE INTO t_record_kp_deduction (record_id, question_no, question_score, max_score, deduction_kp, deduction_aspect) VALUES
 (@record_id, 1, 6, 20, 'TCP/IP参考模型', '基本概念完全未掌握'),
 (@record_id, 2, 8, 20, '信道复用技术,CRC校验', '概念混淆'),
 (@record_id, 3, 10, 20, 'IP数据报分片,子网划分IP地址计算', '计算错误'),
@@ -344,28 +421,28 @@ WHERE s.class_name IN ('计科1801')
 -- Part 7: 预警记录（针对问题学生生成）
 -- ============================================================
 -- 王小明：缺勤5次 + 成绩极低
-INSERT INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
+INSERT IGNORE INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
 SELECT s.id, @course_id, wr.id, wr.rule_type, 'HIGH',
   CONCAT('[预警] ', s.name, '同学已缺勤5次，第1次作业仅56分，建议重点关注')
 FROM t_student s, t_warning_rule wr
 WHERE s.student_no = '201826010123' AND wr.rule_type = 'ATTENDANCE';
 
 -- 艾孜买提：缺勤4次 + 成绩极低
-INSERT INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
+INSERT IGNORE INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
 SELECT s.id, @course_id, wr.id, wr.rule_type, 'HIGH',
   CONCAT('[预警] ', s.name, '同学已缺勤4次，第1次作业仅42分，知识点全面薄弱')
 FROM t_student s, t_warning_rule wr
 WHERE s.student_no = '201826010130' AND wr.rule_type = 'ATTENDANCE';
 
 -- 焦彦博：缺勤3次 + 成绩低
-INSERT INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
+INSERT IGNORE INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
 SELECT s.id, @course_id, wr.id, wr.rule_type, 'MEDIUM',
   CONCAT('[预警] ', s.name, '同学已缺勤3次，建议关注')
 FROM t_student s, t_warning_rule wr
 WHERE s.student_no = '201829010201' AND wr.rule_type = 'ATTENDANCE';
 
 -- 潘伯迈：知识点薄弱预警（无连接的传输协议）
-INSERT INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
+INSERT IGNORE INTO t_warning_record (student_id, course_id, rule_id, warning_type, severity, warning_msg)
 SELECT s.id, @course_id, wr.id, wr.rule_type, 'LOW',
   CONCAT('[预警] ', s.name, '同学在"无连接的传输协议"知识点上掌握率低于30%')
 FROM t_student s, t_warning_rule wr
@@ -373,21 +450,33 @@ WHERE s.student_no = '201803030311' AND wr.rule_type = 'KP_WEAK';
 
 -- ============================================================
 -- Part 8: 通知数据（教师发送 + 系统预警通知）
+-- t_notification 使用 recipient_scope: ALL / STUDENTS
+-- 学生个人通知需要同时在 t_notification_recipient 中插入接收者记录
 -- ============================================================
-INSERT INTO t_notification (sender_id, sender_type, title, content, recipient_type, recipient_id, notification_type)
+INSERT IGNORE INTO t_notification (sender_id, sender_name, title, content, notification_type, recipient_scope, course_id)
 VALUES
-(NULL, 'SYSTEM', '[预警] 王小明的学业风险通知',
+(NULL, '系统', '[预警] 王小明的学业风险通知',
  '王小明同学已缺勤5次，第1次作业仅56分，实验报告平均分低于50分。建议教师尽快与该生沟通，了解具体困难。',
- 'STUDENT', (SELECT id FROM t_student WHERE student_no = '201826010123'), 'WARNING'),
-(NULL, 'SYSTEM', '[预警] 艾孜买提·艾力木的学业风险通知',
+ 'WARNING', 'STUDENTS', @course_id),
+(NULL, '系统', '[预警] 艾孜买提·艾力木的学业风险通知',
  '艾孜买提·艾力木同学已缺勤4次，第1次作业仅42分，各知识点掌握率均低于40%。建议安排重点辅导。',
- 'STUDENT', (SELECT id FROM t_student WHERE student_no = '201826010130'), 'WARNING'),
-(1, 'TEACHER', '第1次作业成绩已发布',
+ 'WARNING', 'STUDENTS', @course_id),
+(1, '张建国', '第1次作业成绩已发布',
  '各位同学，第1次作业-网络层基础的批改已完成，请大家及时查看成绩和错题分析。特别提醒：子网划分计算是需要重点加强的知识点。',
- 'ALL', NULL, 'MANUAL'),
-(1, 'TEACHER', '期中考试通知',
+ 'MANUAL', 'ALL', @course_id),
+(1, '张建国', '期中考试通知',
  '计科1801、1802、1803班同学请注意：期中考试定于第10周进行，涵盖第1-4章内容，题型包括单选、填空、简答和综合题。请提前复习！',
- 'ALL', NULL, 'EXAM_REMIND');
+ 'EXAM_REMIND', 'ALL', @course_id);
+
+-- 为前两条通知建立学生个人接收记录（获取刚插入的notification id）
+SET @notif1_id = (SELECT id FROM t_notification WHERE title = '[预警] 王小明的学业风险通知' AND course_id = @course_id);
+SET @notif2_id = (SELECT id FROM t_notification WHERE title = '[预警] 艾孜买提·艾力木的学业风险通知' AND course_id = @course_id);
+
+INSERT IGNORE INTO t_notification_recipient (notification_id, recipient_id)
+SELECT @notif1_id, u.id FROM t_user u WHERE u.username = '201826010123';
+
+INSERT IGNORE INTO t_notification_recipient (notification_id, recipient_id)
+SELECT @notif2_id, u.id FROM t_user u WHERE u.username = '201826010130';
 
 -- 恢复外键检查
 SET FOREIGN_KEY_CHECKS = 1;
