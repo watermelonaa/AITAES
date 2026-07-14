@@ -40,6 +40,7 @@ public class TeacherImportStrategy implements ImportStrategy {
         GenericExcelListener<TeacherExcelDTO> listener =
                 new GenericExcelListener<>(500, this::saveBatch);
         EasyExcel.read(inputStream, TeacherExcelDTO.class, listener)
+                .excelType(getExcelType(originalFilename))
                 .sheet().doRead();
         return buildResult(listener);
     }

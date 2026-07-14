@@ -1,5 +1,6 @@
 package com.example.aitaes.controller;
 
+import com.example.aitaes.annotation.RequireRole;
 import com.example.aitaes.service.ExportService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -9,52 +10,37 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 /**
- * Excel 导出控制器 — 文件下载
+ * Excel 导出控制器
  */
 @Slf4j
 @RestController
 @RequestMapping("/api/export")
 @RequiredArgsConstructor
+@RequireRole({"TEACHER", "ASSISTANT"})
 public class ExportController {
 
     private final ExportService exportService;
 
-    /** 导出单门课程评价 */
     @GetMapping("/course/{courseId}")
-    public void exportCourseEvaluation(
-            @PathVariable Long courseId,
-            @RequestParam(required = false) String semester,
-            HttpServletResponse response) throws IOException {
-        log.info("导出课程评价: courseId={}, semester={}", courseId, semester);
-        exportService.exportCourseEvaluation(courseId, semester, response);
+    public void exportCourse(@PathVariable Long courseId,
+                              HttpServletResponse response) throws IOException {
+        exportService.exportCourse(courseId, response);
     }
 
-    /** 导出教师全部课程评价 */
     @GetMapping("/teacher/{teacherId}")
-    public void exportTeacherCourses(
-            @PathVariable Long teacherId,
-            @RequestParam(required = false) String semester,
-            HttpServletResponse response) throws IOException {
-        log.info("导出教师评价: teacherId={}, semester={}", teacherId, semester);
-        exportService.exportTeacherCourses(teacherId, semester, response);
+    public void exportTeacher(@PathVariable Long teacherId,
+                               HttpServletResponse response) throws IOException {
+        exportService.exportTeacher(teacherId, response);
     }
 
-    /** 导出学院排名 */
     @GetMapping("/college")
-    public void exportCollegeRanking(
-            @RequestParam(required = false) String college,
-            @RequestParam(required = false) String semester,
-            HttpServletResponse response) throws IOException {
-        log.info("导出学院排名: college={}, semester={}", college, semester);
-        exportService.exportCollegeRanking(college, semester, response);
+    public void exportCollege(HttpServletResponse response) throws IOException {
+        exportService.exportCollege(response);
     }
 
-    /** 导出指定学期的全部课程评价 */
     @GetMapping("/semester/{semester}")
-    public void exportSemesterCourses(
-            @PathVariable String semester,
-            HttpServletResponse response) throws IOException {
-        log.info("导出学期课程评价: semester={}", semester);
-        exportService.exportSemesterCourses(semester, response);
+    public void exportSemester(@PathVariable String semester,
+                                HttpServletResponse response) throws IOException {
+        exportService.exportSemester(semester, response);
     }
 }

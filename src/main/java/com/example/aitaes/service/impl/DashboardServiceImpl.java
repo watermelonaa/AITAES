@@ -5,7 +5,6 @@ import com.example.aitaes.dto.*;
 import com.example.aitaes.entity.*;
 import com.example.aitaes.mapper.*;
 import com.example.aitaes.service.DashboardService;
-import com.example.aitaes.service.EvaluationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,227 +15,262 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 仪表盘数据聚合服务
+ * 教学驾驶舱服务实现
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    private final TeacherMapper teacherMapper;
+    private final CourseStudentMapper courseStudentMapper;
+    private final AssessmentMapper assessmentMapper;
+    private final AssessmentRecordMapper assessmentRecordMapper;
+    private final AttendanceMapper attendanceMapper;
+    private final StudentKpMasteryMapper studentKpMasteryMapper;
+    private final WarningRecordMapper warningRecordMapper;
     private final StudentMapper studentMapper;
     private final CourseMapper courseMapper;
-    private final EvaluationScoreMapper scoreMapper;
-    private final EvaluationService evaluationService;
 
     @Override
-    public OverviewStatsDTO getOverview(String semester) {
-        Long totalTeachers = teacherMapper.selectCount(new LambdaQueryWrapper<>());
-        Long totalStudents = studentMapper.selectCount(new LambdaQueryWrapper<>());
-        Long totalCourses = courseMapper.selectCount(new LambdaQueryWrapper<>());
+    public DashboardOverviewDTO getOverview(Long courseId) {
+        // 班级人数
+        Long studentCount = courseStudentMapper.selectCount(
+                new LambdaQueryWrapper<CourseStudent>()
+                        .eq(CourseStudent::getCourseId, courseId));
 
-        LambdaQueryWrapper<EvaluationScore> scoreQuery = new LambdaQueryWrapper<>();
-        if (semester != null && !semester.isBlank()) {
-            scoreQuery.eq(EvaluationScore::getSemester, semester);
-        }
-        Long totalEvaluations = scoreMapper.selectCount(scoreQuery);
-
-        // 计算所有已评价课程的综合平均分
-        List<Long> evaluatedCourseIds = scoreMapper.selectList(
-                new LambdaQueryWrapper<EvaluationScore>()
-                        .select(EvaluationScore::getCourseId)
-                        .eq(semester != null && !semester.isBlank(),
-                                EvaluationScore::getSemester, semester)
-                        .groupBy(EvaluationScore::getCourseId)
-        ).stream().map(EvaluationScore::getCourseId).distinct().toList();
-
+        // 最近一次考核平均分
+        List<Assessment> assessments = assessmentMapper.selectList(
+                new LambdaQueryWrapper<Assessment>()
+                        .eq(Assessment::getCourseId, courseId)
+                        .orderByDesc(Assessment::getAssessmentDate));
         BigDecimal avgScore = BigDecimal.ZERO;
-        if (!evaluatedCourseIds.isEmpty()) {
-            BigDecimal sum = BigDecimal.ZERO;
-            int count = 0;
-            for (Long courseId : evaluatedCourseIds) {
-                try {
-                    CourseEvaluationDTO eval = evaluationService.calculateCourseScore(courseId, semester);
-                    sum = sum.add(eval.getOverallScore());
-                    count++;
-                } catch (Exception e) {
-                    log.warn("计算课程评分失败 courseId={}", courseId);
+        if (!assessments.isEmpty()) {
+            Assessment latest = assessments.get(0);
+            List<AssessmentRecord> records = assessmentRecordMapper.selectList(
+                    new LambdaQueryWrapper<AssessmentRecord>()
+                            .eq(AssessmentRecord::getAssessmentId, latest.getId()));
+            avgScore = records.stream()
+                    .map(r -> r.getTotalScore() != null ? r.getTotalScore() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            if (!records.isEmpty()) {
+                avgScore = avgScore.divide(new BigDecimal(records.size()), 2, RoundingMode.HALF_UP);
+            }
+        }
+
+        // 出勤率
+        Long totalAtt = attendanceMapper.selectCount(
+                new LambdaQueryWrapper<Attendance>()
+                        .eq(Attendance::getCourseId, courseId));
+        Long presentAtt = attendanceMapper.selectCount(
+                new LambdaQueryWrapper<Attendance>()
+                        .eq(Attendance::getCourseId, courseId)
+                        .eq(Attendance::getStatus, "出勤"));
+        BigDecimal attRate = totalAtt > 0
+                ? new BigDecimal(presentAtt).divide(new BigDecimal(totalAtt), 4, RoundingMode.HALF_UP)
+                        .multiply(new BigDecimal(100)).setScale(1, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // 作业提交率
+        LambdaQueryWrapper<AssessmentRecord> hwWrapper = new LambdaQueryWrapper<AssessmentRecord>()
+                .inSql(AssessmentRecord::getAssessmentId,
+                        "SELECT id FROM t_assessment WHERE course_id = " + courseId
+                                + " AND assessment_type = 'HOMEWORK'");
+        Long totalHw = assessmentRecordMapper.selectCount(hwWrapper);
+        LambdaQueryWrapper<AssessmentRecord> onTimeWrapper = new LambdaQueryWrapper<AssessmentRecord>()
+                .inSql(AssessmentRecord::getAssessmentId,
+                        "SELECT id FROM t_assessment WHERE course_id = " + courseId
+                                + " AND assessment_type = 'HOMEWORK'")
+                .eq(AssessmentRecord::getSubmitStatus, "ON_TIME");
+        Long onTimeHw = assessmentRecordMapper.selectCount(onTimeWrapper);
+        BigDecimal hwRate = totalHw > 0
+                ? new BigDecimal(onTimeHw).divide(new BigDecimal(totalHw), 4, RoundingMode.HALF_UP)
+                        .multiply(new BigDecimal(100)).setScale(1, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        // 预警人数
+        Long warningCount = warningRecordMapper.selectCount(
+                new LambdaQueryWrapper<WarningRecord>()
+                        .eq(WarningRecord::getCourseId, courseId)
+                        .eq(WarningRecord::getIsResolved, 0));
+
+        return DashboardOverviewDTO.builder()
+                .studentCount(studentCount.intValue())
+                .averageScore(avgScore)
+                .attendanceRate(attRate)
+                .homeworkRate(hwRate)
+                .warningCount(warningCount.intValue())
+                .build();
+    }
+
+    @Override
+    public DashboardChartsDTO getCharts(Long courseId) {
+        return DashboardChartsDTO.builder()
+                .scoreDistribution(getScoreDistribution(courseId))
+                .scoreTrend(getScoreTrend(courseId))
+                .attendanceStats(getAttendanceStats(courseId))
+                .homeworkStats(getHomeworkStats(courseId))
+                .knowledgeRadar(getKnowledgeRadar(courseId))
+                .build();
+    }
+
+    @Override
+    public List<WarningStudentDTO> getWarnings(Long courseId) {
+        List<WarningRecord> warnings = warningRecordMapper.selectList(
+                new LambdaQueryWrapper<WarningRecord>()
+                        .eq(WarningRecord::getCourseId, courseId)
+                        .eq(WarningRecord::getIsResolved, 0)
+                        .orderByDesc(WarningRecord::getCreateTime));
+
+        if (warnings.isEmpty()) return Collections.emptyList();
+
+        List<Long> studentIds = warnings.stream()
+                .map(WarningRecord::getStudentId).distinct().collect(Collectors.toList());
+        Map<Long, Student> studentMap = studentMapper.selectBatchIds(studentIds).stream()
+                .collect(Collectors.toMap(Student::getId, s -> s));
+
+        return warnings.stream().map(w -> {
+            Student s = studentMap.get(w.getStudentId());
+            return WarningStudentDTO.builder()
+                    .studentId(w.getStudentId())
+                    .studentNo(s != null ? s.getStudentNo() : null)
+                    .name(s != null ? s.getName() : null)
+                    .courseId(w.getCourseId())
+                    .warningType(w.getWarningType())
+                    .severity(w.getSeverity())
+                    .warningMsg(w.getWarningMsg())
+                    .createTime(w.getCreateTime())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClassVO> getMyCourses(Long teacherId) {
+        List<Course> courses = courseMapper.selectList(
+                new LambdaQueryWrapper<Course>()
+                        .eq(Course::getTeacherId, teacherId)
+                        .orderByDesc(Course::getCreateTime));
+        return courses.stream().map(c -> {
+            Long count = courseStudentMapper.selectCount(
+                    new LambdaQueryWrapper<CourseStudent>()
+                            .eq(CourseStudent::getCourseId, c.getId()));
+            return ClassVO.builder()
+                    .id(c.getId())
+                    .courseNo(c.getCourseNo())
+                    .courseName(c.getCourseName())
+                    .className(c.getCourseName())
+                    .semester(c.getSemester())
+                    .studentCount(count.intValue())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    // ===== 图表数据 =====
+
+    private List<ChartItem> getScoreDistribution(Long courseId) {
+        List<Assessment> assessments = assessmentMapper.selectList(
+                new LambdaQueryWrapper<Assessment>()
+                        .eq(Assessment::getCourseId, courseId)
+                        .orderByDesc(Assessment::getAssessmentDate));
+        if (assessments.isEmpty()) return Collections.emptyList();
+
+        Assessment latest = assessments.get(0);
+        List<AssessmentRecord> records = assessmentRecordMapper.selectList(
+                new LambdaQueryWrapper<AssessmentRecord>()
+                        .eq(AssessmentRecord::getAssessmentId, latest.getId()));
+
+        int[] ranges = {0, 60, 70, 80, 90, 101};
+        String[] labels = {"0-59", "60-69", "70-79", "80-89", "90-100"};
+        int[] counts = new int[5];
+
+        for (AssessmentRecord r : records) {
+            if (r.getTotalScore() == null) continue;
+            int score = r.getTotalScore().intValue();
+            for (int i = 0; i < 5; i++) {
+                if (score >= ranges[i] && score < ranges[i + 1]) {
+                    counts[i]++;
+                    break;
                 }
             }
-            if (count > 0) {
-                avgScore = sum.divide(new BigDecimal(count), 2, RoundingMode.HALF_UP);
-            }
         }
 
-        return OverviewStatsDTO.builder()
-                .totalTeachers(totalTeachers)
-                .totalStudents(totalStudents)
-                .totalCourses(totalCourses)
-                .totalEvaluations(totalEvaluations)
-                .averageOverallScore(avgScore)
-                .evaluatedCourseCount((long) evaluatedCourseIds.size())
-                .build();
+        List<ChartItem> items = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            items.add(ChartItem.builder()
+                    .name(labels[i]).value(new BigDecimal(counts[i])).build());
+        }
+        return items;
     }
 
-    @Override
-    public List<ScoreDistributionDTO> getScoreDistribution(String semester) {
-        // 计算所有课程得分并分桶
-        List<Long> evaluatedCourseIds = scoreMapper.selectList(
-                new LambdaQueryWrapper<EvaluationScore>()
-                        .select(EvaluationScore::getCourseId)
-                        .eq(semester != null && !semester.isBlank(),
-                                EvaluationScore::getSemester, semester)
-                        .groupBy(EvaluationScore::getCourseId)
-        ).stream().map(EvaluationScore::getCourseId).distinct().toList();
+    private List<ChartItem> getScoreTrend(Long courseId) {
+        List<Assessment> assessments = assessmentMapper.selectList(
+                new LambdaQueryWrapper<Assessment>()
+                        .eq(Assessment::getCourseId, courseId)
+                        .in(Assessment::getAssessmentType, "HOMEWORK", "QUIZ", "EXAM_SCORE")
+                        .orderByAsc(Assessment::getAssessmentDate));
 
-        List<BigDecimal> courseScores = new ArrayList<>();
-        for (Long courseId : evaluatedCourseIds) {
-            try {
-                CourseEvaluationDTO eval = evaluationService.calculateCourseScore(courseId, semester);
-                courseScores.add(eval.getOverallScore());
-            } catch (Exception ignored) { /* skip */ }
-        }
-
-        // 分桶统计
-        int total = courseScores.size();
-        String[] labels = {"<60", "60-69", "70-79", "80-89", "≥90"};
-        double[] thresholds = {60, 70, 80, 90};
-
-        List<ScoreDistributionDTO> result = new ArrayList<>();
-        for (int i = 0; i < labels.length; i++) {
-            long count;
-            if (i == 0) {
-                count = courseScores.stream()
-                        .filter(s -> s.compareTo(new BigDecimal("60")) < 0).count();
-            } else if (i == labels.length - 1) {
-                count = courseScores.stream()
-                        .filter(s -> s.compareTo(new BigDecimal("90")) >= 0).count();
-            } else {
-                BigDecimal low = new BigDecimal(String.valueOf((int) thresholds[i - 1]));
-                BigDecimal high = new BigDecimal(String.valueOf((int) thresholds[i]));
-                count = courseScores.stream()
-                        .filter(s -> s.compareTo(low) >= 0 && s.compareTo(high) < 0).count();
-            }
-            result.add(ScoreDistributionDTO.builder()
-                    .label(labels[i])
-                    .count(count)
-                    .percentage(total > 0 ? Math.round(count * 10000.0 / total) / 100.0 : 0.0)
-                    .build());
-        }
-        return result;
+        return assessments.stream().map(a -> {
+            List<AssessmentRecord> records = assessmentRecordMapper.selectList(
+                    new LambdaQueryWrapper<AssessmentRecord>()
+                            .eq(AssessmentRecord::getAssessmentId, a.getId()));
+            BigDecimal avg = records.isEmpty() ? BigDecimal.ZERO
+                    : records.stream().map(r -> r.getTotalScore() != null ? r.getTotalScore() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                            .divide(new BigDecimal(records.size()), 2, RoundingMode.HALF_UP);
+            return ChartItem.builder().name(a.getAssessmentName()).value(avg).build();
+        }).collect(Collectors.toList());
     }
 
-    @Override
-    public TrendDTO getTrend() {
-        // 获取所有学期
-        List<String> semesters = scoreMapper.selectList(
-                new LambdaQueryWrapper<EvaluationScore>()
-                        .select(EvaluationScore::getSemester)
-                        .groupBy(EvaluationScore::getSemester)
-                        .orderByAsc(EvaluationScore::getSemester)
-        ).stream().map(EvaluationScore::getSemester).filter(Objects::nonNull).distinct().toList();
+    private List<ChartItem> getAttendanceStats(Long courseId) {
+        List<Attendance> records = attendanceMapper.selectList(
+                new LambdaQueryWrapper<Attendance>()
+                        .eq(Attendance::getCourseId, courseId));
+        Map<String, Long> grouped = records.stream()
+                .collect(Collectors.groupingBy(Attendance::getStatus, Collectors.counting()));
 
-        List<BigDecimal> overallScores = new ArrayList<>();
-        Map<String, List<BigDecimal>> categoryMap = new LinkedHashMap<>();
-
-        for (String semester : semesters) {
-            List<Long> courseIds = scoreMapper.selectList(
-                    new LambdaQueryWrapper<EvaluationScore>()
-                            .select(EvaluationScore::getCourseId)
-                            .eq(EvaluationScore::getSemester, semester)
-                            .groupBy(EvaluationScore::getCourseId)
-            ).stream().map(EvaluationScore::getCourseId).distinct().toList();
-
-            // 学期综合分
-            BigDecimal semesterAvg = BigDecimal.ZERO;
-            Map<String, List<BigDecimal>> catScores = new LinkedHashMap<>();
-            int courseCount = 0;
-            for (Long courseId : courseIds) {
-                try {
-                    CourseEvaluationDTO eval = evaluationService.calculateCourseScore(courseId, semester);
-                    semesterAvg = semesterAvg.add(eval.getOverallScore());
-                    courseCount++;
-                    if (eval.getCategoryScores() != null) {
-                        for (CategoryScoreDTO cat : eval.getCategoryScores()) {
-                            catScores.computeIfAbsent(cat.getCategory(), k -> new ArrayList<>())
-                                    .add(cat.getScore());
-                        }
-                    }
-                } catch (Exception ignored) { /* skip */ }
-            }
-            if (courseCount > 0) {
-                semesterAvg = semesterAvg.divide(new BigDecimal(courseCount), 2, RoundingMode.HALF_UP);
-            }
-            overallScores.add(semesterAvg);
-
-            // 各维度平均
-            for (Map.Entry<String, List<BigDecimal>> entry : catScores.entrySet()) {
-                BigDecimal avg = entry.getValue().stream()
-                        .reduce(BigDecimal.ZERO, BigDecimal::add)
-                        .divide(new BigDecimal(entry.getValue().size()), 2, RoundingMode.HALF_UP);
-                categoryMap.computeIfAbsent(entry.getKey(), k -> new ArrayList<>()).add(avg);
-            }
-        }
-
-        List<TrendDTO.CategoryTrend> trends = categoryMap.entrySet().stream()
-                .map(e -> TrendDTO.CategoryTrend.builder()
-                        .category(e.getKey()).scores(e.getValue()).build())
-                .toList();
-
-        return TrendDTO.builder()
-                .semesters(semesters)
-                .overallScores(overallScores)
-                .categoryTrends(trends)
-                .build();
+        return Arrays.asList(
+                ChartItem.builder().name("出勤").value(new BigDecimal(grouped.getOrDefault("出勤", 0L))).color("#67C23A").build(),
+                ChartItem.builder().name("迟到").value(new BigDecimal(grouped.getOrDefault("迟到", 0L))).color("#E6A23C").build(),
+                ChartItem.builder().name("请假").value(new BigDecimal(grouped.getOrDefault("请假", 0L))).color("#909399").build(),
+                ChartItem.builder().name("缺勤").value(new BigDecimal(grouped.getOrDefault("缺勤", 0L))).color("#F56C6C").build()
+        );
     }
 
-    @Override
-    public DashboardDTO getDashboard(String semester) {
-        OverviewStatsDTO overview = getOverview(semester);
-        List<ScoreDistributionDTO> distribution = getScoreDistribution(semester);
-        TrendDTO trend = getTrend();
+    private List<HomeworkSubmitStat> getHomeworkStats(Long courseId) {
+        List<Assessment> hwAssessments = assessmentMapper.selectList(
+                new LambdaQueryWrapper<Assessment>()
+                        .eq(Assessment::getCourseId, courseId)
+                        .eq(Assessment::getAssessmentType, "HOMEWORK")
+                        .orderByAsc(Assessment::getAssessmentNo));
 
-        // 学院排名
-        List<Teacher> allTeachers = teacherMapper.selectList(new LambdaQueryWrapper<>());
-        Map<String, List<Teacher>> byCollege = allTeachers.stream()
-                .collect(Collectors.groupingBy(
-                        t -> t.getCollege() != null ? t.getCollege() : "未知"));
+        return hwAssessments.stream().map(hw -> {
+            List<AssessmentRecord> records = assessmentRecordMapper.selectList(
+                    new LambdaQueryWrapper<AssessmentRecord>()
+                            .eq(AssessmentRecord::getAssessmentId, hw.getId()));
+            long onTime = records.stream().filter(r -> "ON_TIME".equals(r.getSubmitStatus())).count();
+            long late = records.stream().filter(r -> "LATE".equals(r.getSubmitStatus())).count();
+            long absent = records.stream().filter(r -> "ABSENT".equals(r.getSubmitStatus())).count();
+            return HomeworkSubmitStat.builder()
+                    .homeworkName(hw.getAssessmentName())
+                    .onTimeCount((int) onTime).lateCount((int) late).absentCount((int) absent)
+                    .build();
+        }).collect(Collectors.toList());
+    }
 
-        List<DashboardDTO.CollegeRankItem> collegeRanking = new ArrayList<>();
-        for (Map.Entry<String, List<Teacher>> entry : byCollege.entrySet()) {
-            String college = entry.getKey();
-            BigDecimal collegeAvg = BigDecimal.ZERO;
-            int teacherCount = 0;
-            long evalCount = 0;
-            for (Teacher teacher : entry.getValue()) {
-                try {
-                    TeacherEvaluationDTO tEval = evaluationService.calculateTeacherScore(
-                            teacher.getId(), semester);
-                    if (tEval.getCourseCount() > 0) {
-                        collegeAvg = collegeAvg.add(tEval.getAverageOverallScore());
-                        teacherCount++;
-                        evalCount += tEval.getCourseCount();
-                    }
-                } catch (Exception ignored) { /* skip */ }
-            }
-            if (teacherCount > 0) {
-                collegeAvg = collegeAvg.divide(new BigDecimal(teacherCount), 2, RoundingMode.HALF_UP);
-                collegeRanking.add(DashboardDTO.CollegeRankItem.builder()
-                        .college(college)
-                        .teacherCount((long) entry.getValue().size())
-                        .evaluatedCourseCount(evalCount)
-                        .avgScore(collegeAvg)
-                        .build());
-            }
-        }
-        collegeRanking.sort((a, b) -> b.getAvgScore().compareTo(a.getAvgScore()));
+    private List<ChartItem> getKnowledgeRadar(Long courseId) {
+        List<StudentKpMastery> masteryList = studentKpMasteryMapper.selectList(
+                new LambdaQueryWrapper<StudentKpMastery>()
+                        .eq(StudentKpMastery::getCourseId, courseId));
 
-        return DashboardDTO.builder()
-                .overview(overview)
-                .scoreDistribution(distribution)
-                .trend(trend)
-                .collegeRanking(collegeRanking.size() > 10
-                        ? collegeRanking.subList(0, 10) : collegeRanking)
-                .build();
+        // 按知识点聚合平均掌握度
+        Map<String, List<StudentKpMastery>> grouped = masteryList.stream()
+                .collect(Collectors.groupingBy(StudentKpMastery::getKpName));
+
+        return grouped.entrySet().stream().map(e -> {
+            BigDecimal avg = e.getValue().stream()
+                    .map(m -> m.getMasteryRate() != null ? m.getMasteryRate() : BigDecimal.ZERO)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(new BigDecimal(e.getValue().size()), 2, RoundingMode.HALF_UP);
+            return ChartItem.builder().name(e.getKey()).value(avg).build();
+        }).collect(Collectors.toList());
     }
 }

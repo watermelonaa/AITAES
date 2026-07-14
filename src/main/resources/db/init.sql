@@ -637,34 +637,7 @@ CREATE TABLE `t_data_import_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据导入日志表';
 
 -- ============================================================
--- 27. 报告表
--- ============================================================
-DROP TABLE IF EXISTS `t_report`;
-CREATE TABLE `t_report` (
-    `id`              BIGINT         NOT NULL AUTO_INCREMENT,
-    `report_name`     VARCHAR(256)   NOT NULL,
-    `report_type`     VARCHAR(32)    DEFAULT NULL COMMENT 'COURSE/CLASS/STUDENT/EXAM/SEMESTER',
-    `semester`        VARCHAR(32)    DEFAULT NULL,
-    `course_id`       BIGINT         DEFAULT NULL,
-    `teacher_id`      BIGINT         DEFAULT NULL,
-    `student_id`      BIGINT         DEFAULT NULL,
-    `summary`         VARCHAR(2048)  DEFAULT NULL,
-    `report_data`     JSON           DEFAULT NULL,
-    `ai_analysis`     TEXT           DEFAULT NULL,
-    `generate_time`   DATETIME       DEFAULT CURRENT_TIMESTAMP,
-    `deleted`         TINYINT        DEFAULT 0,
-    PRIMARY KEY (`id`),
-    KEY `idx_report_type` (`report_type`),
-    KEY `idx_course_id` (`course_id`),
-    KEY `idx_teacher_id` (`teacher_id`),
-    KEY `idx_student_id` (`student_id`),
-    KEY `idx_semester` (`semester`),
-    CONSTRAINT `fk_report_course`  FOREIGN KEY (`course_id`)  REFERENCES `t_course` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT `fk_report_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `t_teacher` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分析报告表';
-
--- ============================================================
--- 28. AI分析结果表
+-- 27. AI分析结果表
 -- ============================================================
 DROP TABLE IF EXISTS `t_ai_analysis_result`;
 CREATE TABLE `t_ai_analysis_result` (
@@ -684,46 +657,6 @@ CREATE TABLE `t_ai_analysis_result` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI分析结果表';
 
 -- ============================================================
--- [DEPRECATED] 评教遗留表（保留向后兼容，不再使用）
--- ============================================================
-DROP TABLE IF EXISTS `t_evaluation_indicator`;
-CREATE TABLE `t_evaluation_indicator` (
-    `id`              BIGINT       NOT NULL AUTO_INCREMENT,
-    `indicator_no`    VARCHAR(16)  NOT NULL,
-    `indicator_name`  VARCHAR(256) NOT NULL,
-    `category`        VARCHAR(64)  DEFAULT NULL,
-    `weight`          DECIMAL(5,4) DEFAULT 0.0000,
-    `parent_id`       BIGINT       DEFAULT NULL,
-    `level`           TINYINT      DEFAULT 1,
-    `description`     VARCHAR(512) DEFAULT NULL,
-    `sort_order`      INT          DEFAULT 0,
-    `create_time`     DATETIME     DEFAULT CURRENT_TIMESTAMP,
-    `deleted`         TINYINT      DEFAULT 0,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_indicator_no` (`indicator_no`),
-    CONSTRAINT `fk_indicator_parent` FOREIGN KEY (`parent_id`) REFERENCES `t_evaluation_indicator` (`id`)
-        ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='[DEPRECATED]评教指标表';
-
-DROP TABLE IF EXISTS `t_evaluation_score`;
-CREATE TABLE `t_evaluation_score` (
-    `id`              BIGINT       NOT NULL AUTO_INCREMENT,
-    `course_id`       BIGINT       NOT NULL,
-    `student_id`      BIGINT       NOT NULL,
-    `indicator_id`    BIGINT       NOT NULL,
-    `score`           DECIMAL(5,2) DEFAULT NULL,
-    `comment`         VARCHAR(1024) DEFAULT NULL,
-    `semester`        VARCHAR(32)  DEFAULT NULL,
-    `evaluate_time`   DATETIME     DEFAULT CURRENT_TIMESTAMP,
-    `deleted`         TINYINT      DEFAULT 0,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_score` (`course_id`, `student_id`, `indicator_id`),
-    CONSTRAINT `fk_score_course`    FOREIGN KEY (`course_id`)    REFERENCES `t_course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_score_student`   FOREIGN KEY (`student_id`)   REFERENCES `t_student` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_score_indicator` FOREIGN KEY (`indicator_id`) REFERENCES `t_evaluation_indicator` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='[DEPRECATED]评教分数表';
-
--- ============================================================
 -- 初始化种子数据
 -- ============================================================
 
@@ -737,8 +670,8 @@ INSERT INTO `t_user` (`username`, `password`, `role`) VALUES
 ('T002', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'TEACHER');
 
 INSERT INTO `t_teacher` (`user_id`, `teacher_no`, `name`, `gender`, `college`, `department`, `title`, `email`) VALUES
-(2, 'T001', '张建国', '男', '计算机学院', '软件工程系', '教授', 'zjg@university.edu.cn'),
-(3, 'T002', '李美玲', '女', '计算机学院', '网络工程系', '副教授', 'lml@university.edu.cn');
+(1, 'T001', '张建国', '男', '计算机学院', '软件工程系', '教授', 'zjg@university.edu.cn'),
+(2, 'T002', '李美玲', '女', '计算机学院', '网络工程系', '副教授', 'lml@university.edu.cn');
 
 -- 预警规则预置
 INSERT INTO `t_warning_rule` (`rule_name`, `rule_type`, `threshold`, `severity`, `is_active`, `description`) VALUES
