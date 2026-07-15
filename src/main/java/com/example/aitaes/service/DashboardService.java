@@ -1,26 +1,31 @@
 package com.example.aitaes.service;
 
-import com.example.aitaes.dto.DashboardDTO;
-import com.example.aitaes.dto.OverviewStatsDTO;
-import com.example.aitaes.dto.ScoreDistributionDTO;
-import com.example.aitaes.dto.TrendDTO;
+import com.example.aitaes.dto.*;
 
 import java.util.List;
 
 /**
- * 仪表盘数据聚合服务接口
+ * 教学驾驶舱服务接口
  */
 public interface DashboardService {
 
-    /** 获取概览统计数据 */
-    OverviewStatsDTO getOverview(String semester);
+    /**
+     * 概览统计卡片
+     */
+    DashboardOverviewDTO getOverview(Long courseId);
 
-    /** 获取全校评分分布 */
-    List<ScoreDistributionDTO> getScoreDistribution(String semester);
+    /**
+     * 图表数据
+     */
+    DashboardChartsDTO getCharts(Long courseId);
 
-    /** 获取学期趋势 */
-    TrendDTO getTrend();
+    /**
+     * 预警学生列表
+     */
+    List<WarningStudentDTO> getWarnings(Long courseId);
 
-    /** 获取仪表盘完整数据 */
-    DashboardDTO getDashboard(String semester);
+    /**
+     * 教师可选班级列表（用于班级切换器 UC27）
+     */
+    List<ClassVO> getMyCourses(Long teacherId);
 }

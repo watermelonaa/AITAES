@@ -1,5 +1,6 @@
 package com.example.aitaes.strategy;
 
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.example.aitaes.dto.ImportResultDTO;
 import com.example.aitaes.enums.ImportType;
 
@@ -15,4 +16,15 @@ public interface ImportStrategy {
 
     /** 执行导入，返回导入结果统计 */
     ImportResultDTO execute(InputStream inputStream, String originalFilename);
+
+    /**
+     * 根据文件名后缀推断 EasyExcel 格式类型
+     * 解决用 InputStream 读取 CSV 时 EasyExcel 无法根据文件名自动推断格式的问题
+     */
+    default ExcelTypeEnum getExcelType(String filename) {
+        if (filename != null && filename.toLowerCase().endsWith(".csv")) {
+            return ExcelTypeEnum.CSV;
+        }
+        return ExcelTypeEnum.XLSX;
+    }
 }

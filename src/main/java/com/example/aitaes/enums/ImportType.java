@@ -13,12 +13,6 @@ public enum ImportType {
     TEACHER("TEACHER", "教师信息"),
     STUDENT("STUDENT", "学生信息"),
     COURSE("COURSE", "课程信息"),
-    /** @deprecated 评教系统遗留，v3.0不再使用 */
-    @Deprecated
-    SCORE("SCORE", "评价分数(遗留)"),
-    /** @deprecated 评教系统遗留，v3.0不再使用 */
-    @Deprecated
-    INDICATOR("INDICATOR", "评价指标(遗留)"),
     // ==== v3.0 新增导入类型 ====
     HOMEWORK("HOMEWORK", "作业成绩"),
     QUIZ("QUIZ", "测验成绩"),

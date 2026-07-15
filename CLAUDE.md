@@ -58,11 +58,9 @@ enums/               ImportType, ImportStatus
 
 **Unified API Response**: All endpoints return `Result<T>` with fields `code` (mirrors HTTP status), `message`, `data`. Never returns raw entities or exceptions — `GlobalExceptionHandler` (`@RestControllerAdvice`) catches everything and converts to `Result`.
 
-**Evaluation Engine** (`EvaluationServiceImpl`): Weighted scoring over a two-level indicator hierarchy. Algorithm: `overallScore = Σ(avgScore × weight)` for all level-2 indicators, normalized to 0–100. Category scores (教学态度/教学内容/教学方法/教学效果) are normalized by category weight. Indicator tree is cached via double-checked locking (loads once at first request).
-
 ### Business Domain
 
-**AITAES** (AI-powered Teaching Analysis & Evaluation System) — v3.0 refactored from a student evaluation system into a full teaching analysis platform.
+**AITAES** (AI-powered Teaching Analysis System) — v3.0 refactored into a full teaching analysis platform.
 
 **4 user roles** sharing a unified `t_user` auth table: `ADMIN` (manages teacher accounts), `TEACHER` (manages their courses/students), `ASSISTANT` (scoped permissions assigned by teacher), `STUDENT` (views own data).
 
@@ -80,10 +78,6 @@ enums/               ImportType, ImportStatus
 |--------|-----------|---------|
 | Data Import | `/api/import` | Excel/CSV upload, type-routed to strategy |
 | Data Source | `/api/datasource` | CRUD for data source configurations |
-| Evaluation | `/api/evaluation` | Course/teacher scoring, college rankings |
-| Dashboard | `/api/dashboard` | Overview stats, score distributions, trends |
-| Report | `/api/report` | Generate and manage evaluation reports |
-| Export | `/api/export` | Download Excel reports (streams to HttpServletResponse) |
 
 Full API documentation is in [docs/api-documentation.md](docs/api-documentation.md). Database schema in [docs/database-design.md](docs/database-design.md).
 

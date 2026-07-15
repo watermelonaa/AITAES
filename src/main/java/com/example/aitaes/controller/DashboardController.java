@@ -1,50 +1,70 @@
 package com.example.aitaes.controller;
 
+import com.example.aitaes.annotation.RequireRole;
 import com.example.aitaes.common.Result;
-import com.example.aitaes.dto.DashboardDTO;
-import com.example.aitaes.dto.OverviewStatsDTO;
-import com.example.aitaes.dto.ScoreDistributionDTO;
-import com.example.aitaes.dto.TrendDTO;
+import com.example.aitaes.dto.*;
 import com.example.aitaes.service.DashboardService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * 仪表盘控制器 — 供前端大屏/图表使用
+ * 教学驾驶舱控制器（教师/助教）
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
+@RequireRole({"TEACHER", "ASSISTANT"})
 public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    /** 仪表盘完整数据 */
+    /**
+     * 驾驶舱完整数据
+     */
     @GetMapping
-    public Result<DashboardDTO> getDashboard(
-            @RequestParam(required = false) String semester) {
-        return Result.success(dashboardService.getDashboard(semester));
+    public Result<Map<String, Object>> full(@RequestParam Long courseId) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("overview", dashboardService.getOverview(courseId));
+        data.put("charts", dashboardService.getCharts(courseId));
+        data.put("warnings", dashboardService.getWarnings(courseId));
+        return Result.success(data);
     }
 
-    /** 概览统计卡片 */
+    /**
+     * 概览统计卡片
+     */
     @GetMapping("/overview")
-    public Result<OverviewStatsDTO> getOverview(
-            @RequestParam(required = false) String semester) {
-        return Result.success(dashboardService.getOverview(semester));
+    public Result<DashboardOverviewDTO> overview(@RequestParam Long courseId) {
+        return Result.success(dashboardService.getOverview(courseId));
     }
 
-    /** 评分分布（柱状图） */
-    @GetMapping("/distribution")
-    public Result<List<ScoreDistributionDTO>> getDistribution(
-            @RequestParam(required = false) String semester) {
-        return Result.success(dashboardService.getScoreDistribution(semester));
+    /**
+     * 图表数据
+     */
+    @GetMapping("/charts")
+    public Result<DashboardChartsDTO> charts(@RequestParam Long courseId) {
+        return Result.success(dashboardService.getCharts(courseId));
     }
 
-    /** 学期趋势（折线图） */
-    @GetMapping("/trend")
-    public Result<TrendDTO> getTrend() {
-        return Result.success(dashboardService.getTrend());
+    /**
+     * 预警学生列表
+     */
+    @GetMapping("/warnings")
+    public Result<List<WarningStudentDTO>> warnings(@RequestParam Long courseId) {
+        return Result.success(dashboardService.getWarnings(courseId));
+    }
+
+    /**
+     * 教师可选班级列表 (UC27 班级切换器)
+     */
+    @GetMapping("/courses")
+    public Result<List<ClassVO>> myCourses(@RequestAttribute("userId") Long userId) {
+        return Result.success(dashboardService.getMyCourses(userId));
     }
 }

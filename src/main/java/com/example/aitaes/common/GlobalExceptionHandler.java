@@ -6,6 +6,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 /**
  * 全局异常处理器
@@ -46,6 +48,20 @@ public class GlobalExceptionHandler {
         log.warn("缺少请求参数: {}", e.getParameterName());
         return Result.error(ResultCode.BAD_REQUEST.getCode(),
                 "缺少必填参数: " + e.getParameterName());
+    }
+
+    /** 缺少上传文件异常（multipart 请求中缺少 file 字段） */
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public Result<?> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+        log.warn("缺少上传文件: {}", e.getRequestPartName());
+        return Result.error(ResultCode.BAD_REQUEST.getCode(), "上传文件不能为空");
+    }
+
+    /** 非 multipart 请求异常（请求未包含文件时） */
+    @ExceptionHandler(MultipartException.class)
+    public Result<?> handleMultipartException(MultipartException e) {
+        log.warn("文件上传异常: {}", e.getMessage());
+        return Result.error(ResultCode.BAD_REQUEST.getCode(), "上传文件不能为空");
     }
 
     /** 兜底异常 */

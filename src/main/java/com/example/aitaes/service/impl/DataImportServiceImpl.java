@@ -1,8 +1,13 @@
 package com.example.aitaes.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.aitaes.common.BusinessException;
 import com.example.aitaes.common.ResultCode;
 import com.example.aitaes.dto.ImportResultDTO;
+import com.example.aitaes.dto.excel.*;
 import com.example.aitaes.entity.DataImportLog;
 import com.example.aitaes.enums.ImportType;
 import com.example.aitaes.mapper.DataImportLogMapper;
@@ -12,12 +17,16 @@ import com.example.aitaes.strategy.ImportStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据导入服务实现
@@ -36,6 +45,20 @@ public class DataImportServiceImpl implements DataImportService {
     /** 支持的导入文件扩展名 */
     private static final List<String> SUPPORTED_EXTENSIONS =
             List.of(".xlsx", ".xls", ".csv");
+
+    /** 导入类型 → 模板 DTO 类映射 */
+    private static final Map<String, Class<?>> TEMPLATE_CLASS_MAP = Map.ofEntries(
+            Map.entry("TEACHER", TeacherExcelDTO.class),
+            Map.entry("STUDENT", StudentExcelDTO.class),
+            Map.entry("COURSE", CourseExcelDTO.class),
+            Map.entry("CLASS_STUDENT", ClassStudentExcelDTO.class),
+            Map.entry("HOMEWORK", AssessmentRecordExcelDTO.class),
+            Map.entry("QUIZ", AssessmentRecordExcelDTO.class),
+            Map.entry("ATTENDANCE", AttendanceExcelDTO.class),
+            Map.entry("EXPERIMENT", ExperimentExcelDTO.class),
+            Map.entry("EXAM_SCORE", AssessmentRecordExcelDTO.class),
+            Map.entry("KNOWLEDGE_POINT", KnowledgePointExcelDTO.class)
+    );
 
     @Override
     public ImportResultDTO importFile(MultipartFile file, String importType, Long sourceId) {
@@ -66,6 +89,28 @@ public class DataImportServiceImpl implements DataImportService {
         saveImportLog(file.getOriginalFilename(), type.getCode(), sourceId, result);
 
         return result;
+    }
+
+    @Override
+    public IPage<DataImportLog> getHistory(int pageNum, int pageSize, String importType) {
+        LambdaQueryWrapper<DataImportLog> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.hasText(importType)) {
+            wrapper.eq(DataImportLog::getImportType, importType.toUpperCase());
+        }
+        wrapper.orderByDesc(DataImportLog::getImportTime);
+        return dataImportLogMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
+    }
+
+    @Override
+    public void generateTemplate(String importType, OutputStream outputStream) {
+        Class<?> dtoClass = TEMPLATE_CLASS_MAP.get(importType.toUpperCase());
+        if (dtoClass == null) {
+            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(),
+                    "不支持的模板类型: " + importType);
+        }
+        EasyExcel.write(outputStream, dtoClass)
+                .sheet("Sheet1")
+                .doWrite(Collections.emptyList());
     }
 
     private void validateFile(MultipartFile file) {
