@@ -38,12 +38,22 @@ public class ExamServiceImpl implements ExamService {
     private final CourseStudentMapper courseStudentMapper;
     private final StudentMapper studentMapper;
     private final CourseMapper courseMapper;
+    private final TeacherMapper teacherMapper;
 
     // ===== 试卷管理 =====
 
     @Override
     @Transactional
-    public ExamPaper createPaper(Long teacherId, ExamPaperCreateDTO dto) {
+    public ExamPaper createPaper(Long userId, ExamPaperCreateDTO dto) {
+        // 将 t_user.id 解析为 t_teacher.id
+        Teacher teacher = teacherMapper.selectOne(
+                new LambdaQueryWrapper<Teacher>()
+                        .eq(Teacher::getUserId, userId));
+        if (teacher == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "教师不存在");
+        }
+        Long teacherId = teacher.getId();
+
         ExamPaper paper = new ExamPaper();
         paper.setCourseId(dto.getCourseId());
         paper.setTeacherId(teacherId);
@@ -80,7 +90,18 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public IPage<ExamPaper> listPapers(int pageNum, int pageSize, Long courseId, Long teacherId) {
+    public IPage<ExamPaper> listPapers(int pageNum, int pageSize, Long courseId, Long userId) {
+        // 将 t_user.id 解析为 t_teacher.id
+        Long teacherId = null;
+        if (userId != null) {
+            Teacher teacher = teacherMapper.selectOne(
+                    new LambdaQueryWrapper<Teacher>()
+                            .eq(Teacher::getUserId, userId));
+            if (teacher != null) {
+                teacherId = teacher.getId();
+            }
+        }
+
         LambdaQueryWrapper<ExamPaper> wrapper = new LambdaQueryWrapper<>();
         if (courseId != null) wrapper.eq(ExamPaper::getCourseId, courseId);
         if (teacherId != null) wrapper.eq(ExamPaper::getTeacherId, teacherId);

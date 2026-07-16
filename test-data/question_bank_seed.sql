@@ -12,7 +12,7 @@ SET NAMES utf8mb4;
 
 -- 确保教师账号存在
 INSERT INTO `t_user` (`username`, `password`, `role`, `first_login`) VALUES
-('T001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'TEACHER', 0)
+('T001', '$2a$10$GUh9AqBupw0IrscEUZ/Bd.03kGXgUUL2x1eFFC7DDckv/PAZx6fzG', 'TEACHER', 0)
 ON DUPLICATE KEY UPDATE `id` = VALUES(`id`);
 
 INSERT INTO `t_teacher` (`user_id`, `teacher_no`, `name`, `gender`, `college`, `department`, `title`, `email`)

@@ -662,16 +662,16 @@ CREATE TABLE `t_ai_analysis_result` (
 
 -- 系统管理员账号
 INSERT INTO `t_user` (`username`, `password`, `role`, `first_login`) VALUES
-('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'ADMIN', 1);
+('admin', '$2a$10$GUh9AqBupw0IrscEUZ/Bd.03kGXgUUL2x1eFFC7DDckv/PAZx6fzG', 'ADMIN', 1);
 
 -- 教师账号
 INSERT INTO `t_user` (`username`, `password`, `role`) VALUES
-('T001', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'TEACHER'),
-('T002', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5Eh', 'TEACHER');
+('T001', '$2a$10$GUh9AqBupw0IrscEUZ/Bd.03kGXgUUL2x1eFFC7DDckv/PAZx6fzG', 'TEACHER'),
+('T002', '$2a$10$GUh9AqBupw0IrscEUZ/Bd.03kGXgUUL2x1eFFC7DDckv/PAZx6fzG', 'TEACHER');
 
-INSERT INTO `t_teacher` (`user_id`, `teacher_no`, `name`, `gender`, `college`, `department`, `title`, `email`) VALUES
-(1, 'T001', '张建国', '男', '计算机学院', '软件工程系', '教授', 'zjg@university.edu.cn'),
-(2, 'T002', '李美玲', '女', '计算机学院', '网络工程系', '副教授', 'lml@university.edu.cn');
+INSERT INTO `t_teacher` (`id`, `user_id`, `teacher_no`, `name`, `gender`, `college`, `department`, `title`, `email`) VALUES
+(2, 2, 'T001', '张建国', '男', '计算机学院', '软件工程系', '教授', 'zjg@university.edu.cn'),
+(3, 3, 'T002', '李美玲', '女', '计算机学院', '网络工程系', '副教授', 'lml@university.edu.cn');
 
 -- 预警规则预置
 INSERT INTO `t_warning_rule` (`rule_name`, `rule_type`, `threshold`, `severity`, `is_active`, `description`) VALUES

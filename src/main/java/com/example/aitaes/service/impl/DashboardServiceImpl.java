@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.aitaes.dto.*;
 import com.example.aitaes.entity.*;
 import com.example.aitaes.mapper.*;
+import com.example.aitaes.common.BusinessException;
+import com.example.aitaes.common.ResultCode;
 import com.example.aitaes.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final WarningRecordMapper warningRecordMapper;
     private final StudentMapper studentMapper;
     private final CourseMapper courseMapper;
+    private final TeacherMapper teacherMapper;
 
     @Override
     public DashboardOverviewDTO getOverview(Long courseId) {
@@ -144,7 +147,16 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<ClassVO> getMyCourses(Long teacherId) {
+    public List<ClassVO> getMyCourses(Long userId) {
+        // 将 t_user.id 解析为 t_teacher.id
+        Teacher teacher = teacherMapper.selectOne(
+                new LambdaQueryWrapper<Teacher>()
+                        .eq(Teacher::getUserId, userId));
+        if (teacher == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "教师不存在");
+        }
+        Long teacherId = teacher.getId();
+
         List<Course> courses = courseMapper.selectList(
                 new LambdaQueryWrapper<Course>()
                         .eq(Course::getTeacherId, teacherId)

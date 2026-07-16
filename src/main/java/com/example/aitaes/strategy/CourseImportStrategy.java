@@ -83,11 +83,20 @@ public class CourseImportStrategy implements ImportStrategy {
             ).stream().collect(Collectors.toMap(Teacher::getTeacherNo, Teacher::getId));
         }
 
-        // 3. 过滤 + 转换
+        // 3. 过滤 + 转换（跳过无法解析教师的课程）
         Map<String, Long> finalTeacherNoToId = teacherNoToId;
         List<Course> courses = dtoList.stream()
                 .filter(dto -> dto.getCourseNo() != null && !dto.getCourseNo().isBlank())
                 .filter(dto -> !existingNos.contains(dto.getCourseNo()))
+                .filter(dto -> {
+                    // 有教师工号但解析失败 → 跳过
+                    if (dto.getTeacherNo() == null || dto.getTeacherNo().isBlank()) return true;
+                    if (!finalTeacherNoToId.containsKey(dto.getTeacherNo())) {
+                        log.warn("课程 {} 的教师 {} 不存在，跳过该行", dto.getCourseNo(), dto.getTeacherNo());
+                        return false;
+                    }
+                    return true;
+                })
                 .map(dto -> toEntity(dto, finalTeacherNoToId))
                 .toList();
 

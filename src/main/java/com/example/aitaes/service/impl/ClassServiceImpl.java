@@ -37,8 +37,23 @@ public class ClassServiceImpl implements ClassService {
 
     // ===== 班级管理 =====
 
+    /**
+     * 将 t_user.id 解析为 t_teacher.id
+     * Controller 层传递的是 userId（t_user.id），Service 需要的是 teacherId（t_teacher.id）
+     */
+    private Long resolveTeacherId(Long userId) {
+        Teacher teacher = teacherMapper.selectOne(
+                new LambdaQueryWrapper<Teacher>()
+                        .eq(Teacher::getUserId, userId));
+        if (teacher == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "教师不存在");
+        }
+        return teacher.getId();
+    }
+
     @Override
-    public List<ClassVO> listMyClasses(Long teacherId) {
+    public List<ClassVO> listMyClasses(Long userId) {
+        Long teacherId = resolveTeacherId(userId);
         List<Course> courses = courseMapper.selectList(
                 new LambdaQueryWrapper<Course>()
                         .eq(Course::getTeacherId, teacherId)
@@ -64,12 +79,9 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional
-    public ClassVO create(Long teacherId, ClassCreateDTO dto) {
-        // 验证教师存在
-        Teacher teacher = teacherMapper.selectById(teacherId);
-        if (teacher == null) {
-            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "教师不存在");
-        }
+    public ClassVO create(Long userId, ClassCreateDTO dto) {
+        // 验证教师存在（userId → teacherId）
+        Long teacherId = resolveTeacherId(userId);
 
         // 生成课程编号
         String courseNo = "C" + System.currentTimeMillis() % 100000;
@@ -251,11 +263,12 @@ public class ClassServiceImpl implements ClassService {
 
     // ===== 私有方法 =====
 
-    private Course getMyCourse(Long classId, Long teacherId) {
+    private Course getMyCourse(Long classId, Long userId) {
         Course course = courseMapper.selectById(classId);
         if (course == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "班级不存在");
         }
+        Long teacherId = resolveTeacherId(userId);
         if (!teacherId.equals(course.getTeacherId())) {
             throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "无权操作该班级");
         }
