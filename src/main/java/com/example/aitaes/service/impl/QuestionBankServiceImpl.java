@@ -7,8 +7,10 @@ import com.example.aitaes.common.BusinessException;
 import com.example.aitaes.common.ResultCode;
 import com.example.aitaes.entity.KnowledgePoint;
 import com.example.aitaes.entity.QuestionBank;
+import com.example.aitaes.entity.Teacher;
 import com.example.aitaes.mapper.KnowledgePointMapper;
 import com.example.aitaes.mapper.QuestionBankMapper;
+import com.example.aitaes.mapper.TeacherMapper;
 import com.example.aitaes.service.QuestionBankService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class QuestionBankServiceImpl implements QuestionBankService {
 
     private final QuestionBankMapper questionBankMapper;
     private final KnowledgePointMapper knowledgePointMapper;
+    private final TeacherMapper teacherMapper;
 
     @Override
     public IPage<QuestionBank> page(int pageNum, int pageSize, Long courseId,
@@ -59,7 +62,15 @@ public class QuestionBankServiceImpl implements QuestionBankService {
     }
 
     @Override
-    public QuestionBank create(QuestionBank entity) {
+    public QuestionBank create(Long userId, QuestionBank entity) {
+        // 解析 userId → teacherId
+        Teacher teacher = teacherMapper.selectOne(
+                new LambdaQueryWrapper<Teacher>()
+                        .eq(Teacher::getUserId, userId));
+        if (teacher == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "教师不存在");
+        }
+        entity.setTeacherId(teacher.getId());
         entity.setUsageCount(0);
         if (!StringUtils.hasText(entity.getStatus())) {
             entity.setStatus("DRAFT");

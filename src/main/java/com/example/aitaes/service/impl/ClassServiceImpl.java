@@ -67,7 +67,7 @@ public class ClassServiceImpl implements ClassService {
                     .id(course.getId())
                     .courseNo(course.getCourseNo())
                     .courseName(course.getCourseName())
-                    .className(course.getCourseName()) // 班级名默认为课程名
+                    .className(course.getClassName() != null ? course.getClassName() : course.getCourseName())
                     .semester(course.getSemester())
                     .credit(course.getCredit())
                     .courseType(course.getCourseType())
@@ -89,6 +89,7 @@ public class ClassServiceImpl implements ClassService {
         Course course = new Course();
         course.setCourseNo(courseNo);
         course.setCourseName(dto.getCourseName());
+        course.setClassName(dto.getClassName());
         course.setTeacherId(teacherId);
         course.setCredit(dto.getCredit());
         course.setCourseType(dto.getCourseType());
@@ -104,6 +105,7 @@ public class ClassServiceImpl implements ClassService {
     public ClassVO update(Long classId, Long teacherId, ClassCreateDTO dto) {
         Course course = getMyCourse(classId, teacherId);
         course.setCourseName(dto.getCourseName());
+        if (dto.getClassName() != null) course.setClassName(dto.getClassName());
         if (dto.getCredit() != null) course.setCredit(dto.getCredit());
         if (dto.getCourseType() != null) course.setCourseType(dto.getCourseType());
         if (dto.getSemester() != null) course.setSemester(dto.getSemester());
@@ -320,7 +322,7 @@ public class ClassServiceImpl implements ClassService {
                 .id(course.getId())
                 .courseNo(course.getCourseNo())
                 .courseName(course.getCourseName())
-                .className(course.getCourseName())
+                .className(course.getClassName() != null ? course.getClassName() : course.getCourseName())
                 .semester(course.getSemester())
                 .credit(course.getCredit())
                 .courseType(course.getCourseType())

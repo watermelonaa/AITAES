@@ -25,7 +25,7 @@ public interface QuestionBankService {
     /**
      * 新增题目
      */
-    QuestionBank create(QuestionBank entity);
+    QuestionBank create(Long userId, QuestionBank entity);
 
     /**
      * 更新题目

@@ -38,6 +38,7 @@ class ExamServiceImplTest {
     @Mock private CourseStudentMapper courseStudentMapper;
     @Mock private StudentMapper studentMapper;
     @Mock private CourseMapper courseMapper;
+    @Mock private TeacherMapper teacherMapper;
     @InjectMocks private ExamServiceImpl examService;
 
     private ExamPaper paper;
@@ -75,6 +76,10 @@ class ExamServiceImplTest {
             qi.setQuestionId(10L); qi.setQuestionNo(1); qi.setScore(new BigDecimal("5"));
             dto.setQuestions(List.of(qi));
 
+            Teacher teacher = new Teacher();
+            teacher.setId(1L);
+            teacher.setUserId(1L);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             when(questionBankMapper.selectById(10L)).thenReturn(question);
 
             ExamPaper result = examService.createPaper(1L, dto);

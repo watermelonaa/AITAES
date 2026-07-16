@@ -83,10 +83,11 @@ public class CourseImportStrategy implements ImportStrategy {
             ).stream().collect(Collectors.toMap(Teacher::getTeacherNo, Teacher::getId));
         }
 
-        // 3. 过滤 + 转换（跳过无法解析教师的课程）
+        // 3. 过滤 + 转换（跳过无效行和无法解析教师的课程）
         Map<String, Long> finalTeacherNoToId = teacherNoToId;
         List<Course> courses = dtoList.stream()
                 .filter(dto -> dto.getCourseNo() != null && !dto.getCourseNo().isBlank())
+                .filter(dto -> dto.getCourseName() != null && !dto.getCourseName().isBlank())
                 .filter(dto -> !existingNos.contains(dto.getCourseNo()))
                 .filter(dto -> {
                     // 有教师工号但解析失败 → 跳过
@@ -100,9 +101,15 @@ public class CourseImportStrategy implements ImportStrategy {
                 .map(dto -> toEntity(dto, finalTeacherNoToId))
                 .toList();
 
-        // 4. 批量插入
+        // 4. 逐行插入（单行失败不影响其他行）
         if (!courses.isEmpty()) {
-            courses.forEach(courseMapper::insert);
+            for (Course course : courses) {
+                try {
+                    courseMapper.insert(course);
+                } catch (Exception e) {
+                    log.warn("插入课程失败: courseNo={}, 原因: {}", course.getCourseNo(), e.getMessage());
+                }
+            }
             log.debug("批量插入课程数据 {} 条", courses.size());
         }
     }

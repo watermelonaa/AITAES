@@ -51,8 +51,9 @@ public class QuestionBankController {
      * 新增题目
      */
     @PostMapping
-    public Result<QuestionBank> create(@RequestBody QuestionBank entity) {
-        return Result.success("题目添加成功", questionBankService.create(entity));
+    public Result<QuestionBank> create(@RequestAttribute("userId") Long userId,
+                                        @RequestBody QuestionBank entity) {
+        return Result.success("题目添加成功", questionBankService.create(userId, entity));
     }
 
     /**

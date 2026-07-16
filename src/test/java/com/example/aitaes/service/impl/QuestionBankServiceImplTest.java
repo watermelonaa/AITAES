@@ -7,8 +7,10 @@ import com.example.aitaes.common.BusinessException;
 import com.example.aitaes.common.ResultCode;
 import com.example.aitaes.entity.QuestionBank;
 import com.example.aitaes.entity.KnowledgePoint;
+import com.example.aitaes.entity.Teacher;
 import com.example.aitaes.mapper.QuestionBankMapper;
 import com.example.aitaes.mapper.KnowledgePointMapper;
+import com.example.aitaes.mapper.TeacherMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,6 +32,7 @@ class QuestionBankServiceImplTest {
 
     @Mock private QuestionBankMapper questionBankMapper;
     @Mock private KnowledgePointMapper knowledgePointMapper;
+    @Mock private TeacherMapper teacherMapper;
     @InjectMocks private QuestionBankServiceImpl questionBankService;
 
     private QuestionBank question;
@@ -103,12 +106,17 @@ class QuestionBankServiceImplTest {
         void shouldSetDefaultsAndInsert() {
             QuestionBank newQ = new QuestionBank();
             newQ.setCourseId(1L);
-            newQ.setTeacherId(1L);
             newQ.setQuestionType("MULTI");
             newQ.setContent("{}");
 
-            questionBankService.create(newQ);
+            Teacher teacher = new Teacher();
+            teacher.setId(1L);
+            teacher.setUserId(2L);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
 
+            questionBankService.create(2L, newQ);
+
+            assertEquals(1L, newQ.getTeacherId());
             assertEquals(0, newQ.getUsageCount());
             assertEquals("DRAFT", newQ.getStatus());
             verify(questionBankMapper).insert(newQ);

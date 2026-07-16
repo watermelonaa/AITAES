@@ -33,6 +33,7 @@ class DashboardServiceImplTest {
     @Mock private WarningRecordMapper warningRecordMapper;
     @Mock private StudentMapper studentMapper;
     @Mock private CourseMapper courseMapper;
+    @Mock private TeacherMapper teacherMapper;
     @InjectMocks private DashboardServiceImpl dashboardService;
 
     @Nested
@@ -144,6 +145,10 @@ class DashboardServiceImplTest {
         @Test
         @DisplayName("DB-06: 应返回教师可选班级")
         void shouldReturnTeacherCourses() {
+            Teacher teacher = new Teacher();
+            teacher.setId(1L);
+            teacher.setUserId(1L);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             Course c = new Course();
             c.setId(1L); c.setCourseNo("CS101"); c.setCourseName("数据结构");
             c.setSemester("2025-2026-1");

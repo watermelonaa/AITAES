@@ -136,6 +136,7 @@ CREATE TABLE `t_course` (
     `id`                    BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `course_no`             VARCHAR(32)    NOT NULL COMMENT '课程编号',
     `course_name`           VARCHAR(256)   NOT NULL COMMENT '课程名称',
+    `class_name`            VARCHAR(256)   DEFAULT NULL COMMENT '班级名称（默认为课程名）',
     `teacher_id`            BIGINT         DEFAULT NULL COMMENT '授课教师ID',
     `credit`                DECIMAL(4,1)   DEFAULT 0.0 COMMENT '学分',
     `course_type`           VARCHAR(32)    DEFAULT NULL COMMENT '必修/选修/公选',

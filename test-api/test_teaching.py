@@ -27,8 +27,7 @@ class TestPortrait:
         self.headers = auth_headers(teacher_token)
 
     def _get_course_and_student(self):
-        """获取第一个可用课程和其中的学生"""
-        # 取课程
+        """获取第一个有学生的课程"""
         resp = self.session.get(
             f"{self.base_url}/api/dashboard/courses",
             headers=self.headers
@@ -38,9 +37,18 @@ class TestPortrait:
         courses = resp.json()["data"]
         if not courses:
             return None, None
-        course_id = courses[0]["id"]
 
-        # 取学生
+        # 按 studentCount 降序优先，找到第一个有学生的课程
+        courses.sort(key=lambda c: c.get("studentCount", 0), reverse=True)
+        course_id = None
+        for c in courses:
+            if c.get("studentCount", 0) > 0:
+                course_id = c["id"]
+                break
+        if course_id is None:
+            return None, None
+
+        # 取第一个学生
         resp2 = self.session.get(
             f"{self.base_url}/api/classes/{course_id}/students",
             headers=self.headers

@@ -43,6 +43,7 @@ class ClassServiceImplTest {
     void setUp() {
         teacher = new Teacher();
         teacher.setId(1L);
+        teacher.setUserId(1L);
         teacher.setTeacherNo("T001");
         teacher.setName("张老师");
 
@@ -73,6 +74,7 @@ class ClassServiceImplTest {
         @Test
         @DisplayName("CS-01: 应返回班级列表含人数")
         void shouldReturnClassesWithStudentCount() {
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             when(courseMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(List.of(course));
             when(courseStudentMapper.selectCount(any(LambdaQueryWrapper.class))).thenReturn(30L);
 
@@ -86,6 +88,7 @@ class ClassServiceImplTest {
         @Test
         @DisplayName("CS-02: 无班级时应返回空列表")
         void shouldReturnEmpty_WhenNoCourses() {
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             when(courseMapper.selectList(any(LambdaQueryWrapper.class))).thenReturn(List.of());
             assertTrue(classService.listMyClasses(1L).isEmpty());
         }
@@ -98,7 +101,7 @@ class ClassServiceImplTest {
         @Test
         @DisplayName("CS-03: 应成功创建班级")
         void shouldCreateClass() {
-            when(teacherMapper.selectById(1L)).thenReturn(teacher);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             ClassCreateDTO dto = new ClassCreateDTO();
             dto.setClassName("软工2101");
             dto.setCourseName("软件工程");
@@ -113,7 +116,7 @@ class ClassServiceImplTest {
         @Test
         @DisplayName("CS-04: 教师不存在应抛出异常")
         void shouldThrowException_WhenTeacherNotFound() {
-            when(teacherMapper.selectById(999L)).thenReturn(null);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(null);
             ClassCreateDTO dto = new ClassCreateDTO();
             dto.setClassName("X"); dto.setCourseName("Y"); dto.setSemester("S");
 
@@ -129,6 +132,10 @@ class ClassServiceImplTest {
         @DisplayName("CS-05: 非班级所有者应被拒绝")
         void shouldRejectNonOwner() {
             when(courseMapper.selectById(1L)).thenReturn(course);
+            Teacher otherTeacher = new Teacher();
+            otherTeacher.setId(999L);
+            otherTeacher.setUserId(999L);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(otherTeacher);
 
             BusinessException ex = assertThrows(BusinessException.class,
                     () -> classService.delete(1L, 999L));
@@ -139,6 +146,7 @@ class ClassServiceImplTest {
         @DisplayName("CS-06: 应清理关联关系")
         void shouldDeleteWithRelations() {
             when(courseMapper.selectById(1L)).thenReturn(course);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
 
             classService.delete(1L, 1L);
 
@@ -155,6 +163,7 @@ class ClassServiceImplTest {
         @DisplayName("CS-07: 学生已存在时应直接关联")
         void shouldLinkExistingStudent() {
             when(courseMapper.selectById(1L)).thenReturn(course);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             when(studentMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(student);
             when(courseStudentMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(null);
 
@@ -173,6 +182,7 @@ class ClassServiceImplTest {
         @DisplayName("CS-08: 学生在班级中已存在应抛出异常")
         void shouldThrowException_WhenAlreadyInClass() {
             when(courseMapper.selectById(1L)).thenReturn(course);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
             when(studentMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(student);
             when(courseStudentMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(courseStudent);
 
@@ -193,6 +203,7 @@ class ClassServiceImplTest {
         @DisplayName("CS-09: 应移除关联不删除账号")
         void shouldRemoveRelationNotAccount() {
             when(courseMapper.selectById(1L)).thenReturn(course);
+            when(teacherMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(teacher);
 
             classService.removeStudent(1L, 100L, 1L);
 

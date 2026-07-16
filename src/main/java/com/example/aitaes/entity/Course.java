@@ -21,6 +21,9 @@ public class Course {
     /** 课程名称 */
     private String courseName;
 
+    /** 班级名称（如"计科1801"，默认为课程名） */
+    private String className;
+
     /** 授课教师ID */
     private Long teacherId;
 
